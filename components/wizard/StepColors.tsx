@@ -37,7 +37,7 @@ export default function StepColors({ data, onChange }: StepProps) {
       <div>
         <h2 className="text-lg font-semibold text-gray-900">School Colors</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Choose your school's primary and accent colors. All UI shades are derived automatically.
+          Choose your school&apos;s primary and accent colors. All UI shades are derived automatically.
         </p>
       </div>
 

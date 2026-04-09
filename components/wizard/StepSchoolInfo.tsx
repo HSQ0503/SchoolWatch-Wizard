@@ -19,7 +19,7 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
       <div>
         <h2 className="text-lg font-semibold text-gray-900">School Information</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Basic details about your school and the app you're setting up.
+          Basic details about your school and the app you&apos;re setting up.
         </p>
       </div>
 

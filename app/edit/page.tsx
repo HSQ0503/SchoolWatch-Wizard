@@ -44,16 +44,12 @@ function EditPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [status, setStatus] = useState<Status>("verifying");
+  const [status, setStatus] = useState<Status>(() => token ? "verifying" : "error");
   const [school, setSchool] = useState<{ config_data: WizardFormData } | null>(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => token ? "" : "No login token provided");
 
   useEffect(() => {
-    if (!token) {
-      setError("No login token provided");
-      setStatus("error");
-      return;
-    }
+    if (!token) return;
 
     async function load() {
       try {

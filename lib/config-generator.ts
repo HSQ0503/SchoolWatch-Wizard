@@ -101,7 +101,7 @@ function serializeEvents(
 }
 
 export function generateConfigTs(data: WizardFormData): string {
-  const { school, colors: inputColors, schedule, lunchWaves, calendar, features } = data;
+  const { school, colors: inputColors, lunchWaves, calendar, features } = data;
   const colors = deriveColors(inputColors.primary, inputColors.accent);
   const storagePrefix = generateSlug(school.appName);
 
