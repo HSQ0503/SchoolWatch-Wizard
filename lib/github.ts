@@ -1,5 +1,6 @@
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN!;
 const GITHUB_ORG = process.env.GITHUB_ORG!;
+const TEMPLATE_OWNER = process.env.GITHUB_TEMPLATE_OWNER || "HSQ0503";
 
 const BASE = "https://api.github.com";
 
@@ -13,7 +14,7 @@ export async function createRepoFromTemplate(
   name: string
 ): Promise<{ fullName: string; url: string }> {
   const res = await fetch(
-    `${BASE}/repos/${GITHUB_ORG}/SchoolWatch/generate`,
+    `${BASE}/repos/${TEMPLATE_OWNER}/SchoolWatch/generate`,
     {
       method: "POST",
       headers,
