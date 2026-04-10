@@ -14,10 +14,11 @@ export async function POST(req: NextRequest) {
 
     const repo = await createRepoFromTemplate(repoName);
 
+    // Create Vercel project BEFORE pushing config so the push triggers a deployment
+    const project = await createProject(repoName, repo.fullName);
+
     const configContent = generateConfigTs(data);
     await pushFile(repoName, "school.config.ts", configContent, "Configure school via wizard");
-
-    const project = await createProject(repoName, repo.fullName);
 
     const school = await prisma.school.create({
       data: {

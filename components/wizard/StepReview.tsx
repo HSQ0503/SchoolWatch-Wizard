@@ -60,7 +60,7 @@ export default function StepReview({ data }: StepProps) {
       setDeployState("deploying");
       await new Promise((r) => setTimeout(r, 1000));
       setDeployState("done");
-      setDeployUrl(json.url);
+      setDeployUrl(json.deployedUrl);
     } catch (err) {
       setDeployState("error");
       setDeployError(err instanceof Error ? err.message : "Unknown error");
