@@ -107,7 +107,7 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
 
       {/* Step content */}
       <main className="flex-1 px-6 py-10">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto" key={currentStep}>
           {steps[currentStep]({ data, onChange: setData })}
         </div>
       </main>
