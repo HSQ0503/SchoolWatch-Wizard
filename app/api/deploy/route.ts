@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateSlug, generateConfigTs } from "@/lib/config-generator";
-import { createRepoFromTemplate, pushFile } from "@/lib/github";
+import { createRepoFromTemplate, waitForRepoReady, pushFile } from "@/lib/github";
 import { createProject } from "@/lib/vercel";
 import type { WizardFormData } from "@/lib/types";
 
@@ -13,6 +13,9 @@ export async function POST(req: NextRequest) {
     const repoName = "schoolwatch-" + slug;
 
     const repo = await createRepoFromTemplate(repoName);
+
+    // Wait for GitHub to finish copying template files before doing anything else
+    await waitForRepoReady(repoName);
 
     // Create Vercel project BEFORE pushing config so the push triggers a deployment
     const project = await createProject(repoName, repo.fullName);

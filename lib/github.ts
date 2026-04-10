@@ -35,6 +35,26 @@ export async function createRepoFromTemplate(
   return { fullName: data.full_name as string, url: data.html_url as string };
 }
 
+// Wait for a template repo to finish initializing (GitHub copies files async)
+export async function waitForRepoReady(
+  repoName: string,
+  maxAttempts = 15,
+): Promise<void> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const res = await fetch(
+      `${BASE}/repos/${GITHUB_ORG}/${repoName}/contents/package.json`,
+      { headers }
+    );
+    if (res.ok) {
+      console.log(`[github] Repo ready after ${i + 1} attempt(s)`);
+      return;
+    }
+    console.log(`[github] Repo not ready yet (attempt ${i + 1}/${maxAttempts}), waiting...`);
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  throw new Error("Timed out waiting for template repo to initialize");
+}
+
 async function getFileSha(
   repoName: string,
   path: string
@@ -56,28 +76,46 @@ export async function pushFile(
   repoName: string,
   path: string,
   content: string,
-  message: string
+  message: string,
+  maxRetries = 5,
 ): Promise<void> {
-  const sha = await getFileSha(repoName, path);
   const encoded = Buffer.from(content, "utf-8").toString("base64");
 
-  const body: Record<string, unknown> = {
-    message,
-    content: encoded,
-  };
-  if (sha) body.sha = sha;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // Re-fetch SHA on each attempt in case the repo state changed
+    const sha = await getFileSha(repoName, path);
+    console.log(`[github] pushFile "${path}" attempt ${attempt + 1}/${maxRetries}, sha=${sha ?? "null"}`);
 
-  const res = await fetch(
-    `${BASE}/repos/${GITHUB_ORG}/${repoName}/contents/${path}`,
-    {
-      method: "PUT",
-      headers,
-      body: JSON.stringify(body),
+    const body: Record<string, unknown> = {
+      message,
+      content: encoded,
+    };
+    if (sha) body.sha = sha;
+
+    const res = await fetch(
+      `${BASE}/repos/${GITHUB_ORG}/${repoName}/contents/${path}`,
+      {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (res.ok) {
+      console.log(`[github] pushFile "${path}" succeeded on attempt ${attempt + 1}`);
+      return;
     }
-  );
 
-  if (!res.ok) {
     const err = await res.text();
+
+    // 409 = git ref conflict (template still settling), retry after backoff
+    if (res.status === 409 && attempt < maxRetries - 1) {
+      const delay = 3000 * (attempt + 1);
+      console.log(`[github] pushFile "${path}" got 409, retrying in ${delay}ms...`);
+      await new Promise((r) => setTimeout(r, delay));
+      continue;
+    }
+
     throw new Error(`Failed to push file "${path}": ${res.status} ${err}`);
   }
 }
