@@ -8,7 +8,7 @@ export async function sendMagicLinkEmail(
   schoolName: string
 ): Promise<void> {
   const { error } = await resend.emails.send({
-    from: "SchoolWatch <onboarding@resend.dev>",
+    from: "SchoolWatch <noreply@lakerwatch.com>",
     to: email,
     subject: `Edit your ${schoolName} dashboard`,
     html: `
