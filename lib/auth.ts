@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 
 const SECRET = new TextEncoder().encode(process.env.MAGIC_LINK_SECRET!);
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || "").replace(/"/g, "").replace(/\/$/, "");
 
 export async function createMagicLinkToken(email: string): Promise<string> {
   return new SignJWT({ email })
