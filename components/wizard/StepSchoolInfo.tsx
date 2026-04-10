@@ -8,6 +8,7 @@ const inputClass =
 const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
 export default function StepSchoolInfo({ data, onChange }: StepProps) {
+  console.log("[StepSchoolInfo] Rendering. school:", data.school.name);
   const school = data.school;
 
   function updateSchool(patch: Partial<WizardFormData["school"]>) {

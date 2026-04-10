@@ -31,13 +31,13 @@ function ErrorMessage({ message }: { message: string }) {
 }
 
 const STEPS = [
-  (props: Parameters<typeof StepSchoolInfo>[0]) => <StepSchoolInfo {...props} />,
-  (props: Parameters<typeof StepColors>[0]) => <StepColors {...props} />,
-  (props: Parameters<typeof StepSchedule>[0]) => <StepSchedule {...props} />,
-  (props: Parameters<typeof StepLunchWaves>[0]) => <StepLunchWaves {...props} />,
-  (props: Parameters<typeof StepCalendar>[0]) => <StepCalendar {...props} />,
-  (props: Parameters<typeof StepFeatures>[0]) => <StepFeatures {...props} />,
-  (props: Parameters<typeof StepReview>[0]) => <StepReview {...props} />,
+  StepSchoolInfo,
+  StepColors,
+  StepSchedule,
+  StepLunchWaves,
+  StepCalendar,
+  StepFeatures,
+  StepReview,
 ];
 
 function EditPageContent() {

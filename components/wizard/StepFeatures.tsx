@@ -48,6 +48,7 @@ function CheckIcon({ checked }: { checked: boolean }) {
 }
 
 export default function StepFeatures({ data, onChange }: StepProps) {
+  console.log("[StepFeatures] Rendering. events:", data.features.events, "productivity:", data.features.productivity);
   function toggle(key: keyof WizardFormData["features"]) {
     onChange({
       ...data,

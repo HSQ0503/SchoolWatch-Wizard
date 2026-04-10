@@ -23,6 +23,7 @@ function genId() {
 }
 
 export default function StepSchedule({ data, onChange }: StepProps) {
+  console.log("[StepSchedule] Rendering. dayTypes:", data.schedule.dayTypes.length, "bells keys:", Object.keys(data.schedule.bells));
   const [activeDayTypeIndex, setActiveDayTypeIndex] = useState(0);
 
   const { dayTypes, bells } = data.schedule;

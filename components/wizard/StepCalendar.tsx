@@ -42,6 +42,7 @@ function TrashIcon() {
 }
 
 export default function StepCalendar({ data, onChange }: StepProps) {
+  console.log("[StepCalendar] Rendering. noSchool:", data.calendar.noSchoolDates.length, "events:", data.calendar.events.length);
   const [activeTab, setActiveTab] = useState<Tab>("no-school");
 
   const { noSchoolDates, earlyDismissalDates, events } = data.calendar;

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { Component, ErrorInfo, ReactNode, useState, useEffect, ComponentType } from "react";
 import { WizardFormData } from "@/lib/types";
 
 export const STEPS = [
@@ -69,8 +69,41 @@ export type StepProps = {
   onChange: (data: WizardFormData) => void;
 };
 
+// Error boundary to catch and log React errors
+class StepErrorBoundary extends Component<
+  { stepIndex: number; children: ReactNode },
+  { error: Error | null }
+> {
+  constructor(props: { stepIndex: number; children: ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error(`[WizardShell] Step ${this.props.stepIndex} crashed:`, error);
+    console.error("[WizardShell] Component stack:", info.componentStack);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center">
+          <p className="text-red-400 font-semibold mb-2">Step failed to render</p>
+          <p className="text-red-300 text-sm font-mono break-all">{this.state.error.message}</p>
+          <p className="text-gray-500 text-xs mt-3">Check browser console for full stack trace</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 type WizardShellProps = {
-  steps: ((props: StepProps) => ReactNode)[];
+  steps: ComponentType<StepProps>[];
   initialData?: WizardFormData;
 };
 
@@ -82,6 +115,25 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
   const progressPercent = ((currentStep + 1) / totalSteps) * 100;
   const isFirst = currentStep === 0;
   const isLast = currentStep === totalSteps - 1;
+
+  // Debug: log step transitions
+  useEffect(() => {
+    console.log(`[WizardShell] Mounted. Step count: ${steps.length}, Data keys:`, Object.keys(data));
+  }, []);
+
+  useEffect(() => {
+    const StepComponent = steps[currentStep];
+    console.log(`[WizardShell] Step changed to ${currentStep} ("${STEPS[currentStep]}")`);
+    console.log(`[WizardShell] Component:`, StepComponent?.name || StepComponent || "UNDEFINED");
+    console.log(`[WizardShell] Form data snapshot:`, JSON.parse(JSON.stringify(data)));
+  }, [currentStep]);
+
+  const StepComponent = steps[currentStep];
+
+  if (!StepComponent) {
+    console.error(`[WizardShell] No step component at index ${currentStep}. Steps array length: ${steps.length}`);
+    return <div className="text-red-400 p-8">Error: No step component at index {currentStep}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -105,10 +157,12 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
         </div>
       </div>
 
-      {/* Step content */}
+      {/* Step content — rendered as a proper React element so hooks are isolated */}
       <main className="flex-1 px-6 py-10">
-        <div className="max-w-2xl mx-auto" key={currentStep}>
-          {steps[currentStep]({ data, onChange: setData })}
+        <div className="max-w-2xl mx-auto">
+          <StepErrorBoundary stepIndex={currentStep} key={currentStep}>
+            <StepComponent key={currentStep} data={data} onChange={setData} />
+          </StepErrorBoundary>
         </div>
       </main>
 
@@ -116,7 +170,10 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
       <div className="sticky bottom-0 bg-black border-t border-white/10 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
           <button
-            onClick={() => setCurrentStep((s) => s - 1)}
+            onClick={() => {
+              console.log(`[WizardShell] Back clicked. ${currentStep} -> ${currentStep - 1}`);
+              setCurrentStep((s) => s - 1);
+            }}
             disabled={isFirst}
             className="px-5 py-2.5 rounded-lg text-sm font-medium border border-white/20 text-gray-300 hover:text-white hover:border-white/40 transition-colors duration-150 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
@@ -125,7 +182,10 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
 
           {!isLast && (
             <button
-              onClick={() => setCurrentStep((s) => s + 1)}
+              onClick={() => {
+                console.log(`[WizardShell] Next clicked. ${currentStep} -> ${currentStep + 1}`);
+                setCurrentStep((s) => s + 1);
+              }}
               className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-white text-black hover:bg-gray-100 transition-colors duration-150 cursor-pointer"
             >
               Next

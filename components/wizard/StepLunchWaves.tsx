@@ -15,6 +15,7 @@ const DEFAULT_WAVES: WaveOption[] = [
 ];
 
 export default function StepLunchWaves({ data, onChange }: StepProps) {
+  console.log("[StepLunchWaves] Rendering. enabled:", data.lunchWaves.enabled, "options:", data.lunchWaves.options.length);
   const { enabled, options, default: defaultWave } = data.lunchWaves;
 
   function updateLunchWaves(patch: Partial<WizardFormData["lunchWaves"]>) {

@@ -18,6 +18,7 @@ const SWATCH_LABELS: Record<string, string> = {
 };
 
 export default function StepColors({ data, onChange }: StepProps) {
+  console.log("[StepColors] Rendering. primary:", data.colors.primary, "accent:", data.colors.accent);
   const { primary, accent } = data.colors;
 
   function updateColors(patch: Partial<WizardFormData["colors"]>) {

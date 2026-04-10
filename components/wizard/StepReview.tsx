@@ -22,6 +22,7 @@ function Row({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function StepReview({ data }: StepProps) {
+  console.log("[StepReview] Rendering. school:", data.school.name, "email:", data.contactEmail);
   const [deployState, setDeployState] = useState<DeployState>("idle");
   const [deployUrl, setDeployUrl] = useState<string | undefined>();
   const [deployError, setDeployError] = useState<string | undefined>();
