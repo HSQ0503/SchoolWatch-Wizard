@@ -45,7 +45,7 @@ function EditPageContent() {
   const token = searchParams.get("token");
 
   const [status, setStatus] = useState<Status>(() => token ? "verifying" : "error");
-  const [school, setSchool] = useState<{ config_data: WizardFormData } | null>(null);
+  const [school, setSchool] = useState<{ id: string; configData: WizardFormData } | null>(null);
   const [error, setError] = useState(() => token ? "" : "No login token provided");
 
   useEffect(() => {
@@ -97,7 +97,7 @@ function EditPageContent() {
   return (
     <WizardShell
       steps={STEPS}
-      initialData={school!.config_data as WizardFormData}
+      initialData={school!.configData as WizardFormData}
     />
   );
 }
