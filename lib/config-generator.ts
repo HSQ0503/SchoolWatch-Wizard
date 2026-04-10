@@ -100,7 +100,7 @@ function serializeEvents(
     .join(",\n");
 }
 
-export function generateConfigTs(data: WizardFormData): string {
+export function generateConfigTs(data: WizardFormData, logoPath = "/logo.png"): string {
   const { school, colors: inputColors, lunchWaves, calendar, features } = data;
   const colors = deriveColors(inputColors.primary, inputColors.accent);
   const storagePrefix = generateSlug(school.appName);
@@ -125,7 +125,7 @@ const config: SchoolConfig = {
     mascot: "${esc(school.mascot)}",
     appName: "${esc(school.appName)}",
     domain: "",
-    logoPath: "/logo.png",
+    logoPath: "${esc(logoPath)}",
     academicYear: "${esc(school.academicYear)}",
   },
   location: {

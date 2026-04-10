@@ -32,11 +32,9 @@ export async function POST(req: NextRequest) {
     const dataForConfig = { ...data };
     delete dataForConfig.logo;
 
-    const configContent = generateConfigTs(dataForConfig);
-    await pushFile(school.githubRepoName, "school.config.ts", configContent, "Update school config via wizard");
-
-    // Push new logo if provided
+    // Push new logo if provided (before config so we know the real extension)
     let logoUrl = school.logoUrl;
+    let logoPath = school.logoUrl ?? "/logo.png";
     if (logoDataUrl) {
       try {
         const match = logoDataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
@@ -46,11 +44,15 @@ export async function POST(req: NextRequest) {
           const buffer = Buffer.from(match[2], "base64");
           await pushLogo(school.githubRepoName, buffer, filename);
           logoUrl = `/${filename}`;
+          logoPath = `/${filename}`;
         }
       } catch (logoErr) {
         console.error("[redeploy] Failed to push logo:", logoErr);
       }
     }
+
+    const configContent = generateConfigTs(dataForConfig, logoPath);
+    await pushFile(school.githubRepoName, "school.config.ts", configContent, "Update school config via wizard");
 
     await prisma.school.update({
       where: { id: schoolId },
