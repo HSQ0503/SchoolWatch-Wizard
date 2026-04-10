@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { generateSlug, generateConfigTs } from "@/lib/config-generator";
 import { createRepoFromTemplate, waitForRepoReady, pushFile } from "@/lib/github";
 import { createProject } from "@/lib/vercel";
+import { createMagicLinkToken, getMagicLinkUrl } from "@/lib/auth";
+import { sendMagicLinkEmail } from "@/lib/email";
 import type { WizardFormData } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
@@ -34,6 +36,15 @@ export async function POST(req: NextRequest) {
         deployedUrl: project.url,
       },
     });
+
+    // Send the admin their first magic link email so they can edit later
+    try {
+      const token = await createMagicLinkToken(data.contactEmail);
+      const editUrl = getMagicLinkUrl(token);
+      await sendMagicLinkEmail(data.contactEmail, editUrl, data.school.name);
+    } catch (emailErr) {
+      console.error("[deploy] Failed to send welcome email:", emailErr);
+    }
 
     return NextResponse.json({
       schoolId: school.id,
