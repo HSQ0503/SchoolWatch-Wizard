@@ -1,26 +1,58 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import type { WizardFormData } from "@/lib/types";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black";
+  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150";
 
-const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 
 export default function StepSchoolInfo({ data, onChange }: StepProps) {
-  console.log("[StepSchoolInfo] Rendering. school:", data.school.name);
   const school = data.school;
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus school name on mount
+  useEffect(() => { nameRef.current?.focus(); }, []);
 
   function updateSchool(patch: Partial<WizardFormData["school"]>) {
     onChange({ ...data, school: { ...school, ...patch } });
   }
 
+  // Auto-derive fields from school name to reduce typing
+  function handleNameChange(name: string) {
+    const patch: Partial<WizardFormData["school"]> = { name };
+
+    // Auto-fill shortName if untouched or matches previous derivation
+    const prevDerived = school.name.split(" ").slice(0, 2).join(" ");
+    if (!school.shortName || school.shortName === prevDerived) {
+      patch.shortName = name.split(" ").slice(0, 2).join(" ");
+    }
+
+    // Auto-fill acronym if untouched or matches previous derivation
+    const prevAcronym = school.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 4);
+    if (!school.acronym || school.acronym === prevAcronym) {
+      patch.acronym = name.split(" ").filter(w => w.length > 0).map(w => w[0]).join("").toUpperCase().slice(0, 4);
+    }
+
+    // Auto-fill appName
+    const prevApp = school.name.split(" ")[0] + "Watch";
+    if (!school.appName || school.appName === prevApp) {
+      const firstWord = name.split(" ")[0] || "";
+      patch.appName = firstWord ? firstWord + "Watch" : "";
+    }
+
+    updateSchool(patch);
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">School Information</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Basic details about your school and the app you&apos;re setting up.
+        <h2 className="text-xl font-semibold text-white">School Information</h2>
+        <p className="mt-1 text-sm text-gray-400">
+          Basic details about your school. Short name, acronym, and app name auto-fill as you type.
         </p>
       </div>
 
@@ -29,11 +61,12 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
         <div>
           <label className={labelClass}>School Name (full)</label>
           <input
+            ref={nameRef}
             className={inputClass}
             type="text"
             placeholder="Windermere Preparatory School"
             value={school.name}
-            onChange={(e) => updateSchool({ name: e.target.value })}
+            onChange={(e) => handleNameChange(e.target.value)}
           />
         </div>
 
@@ -49,7 +82,7 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
             />
           </div>
           <div>
-            <label className={labelClass}>Acronym (max 4)</label>
+            <label className={labelClass}>Acronym</label>
             <input
               className={inputClass}
               type="text"
@@ -87,7 +120,7 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
 
       {/* Location */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Location</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>City</label>
@@ -113,7 +146,7 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>State Code (max 2)</label>
+            <label className={labelClass}>State Code</label>
             <input
               className={inputClass}
               type="text"
@@ -128,7 +161,7 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
             <input
               className={inputClass}
               type="text"
-              placeholder="2025–2026"
+              placeholder="2025-2026"
               value={school.academicYear}
               onChange={(e) => updateSchool({ academicYear: e.target.value })}
             />
@@ -137,8 +170,8 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
       </div>
 
       {/* Contact */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Contact</h3>
+      <div className="space-y-3">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</h3>
         <div>
           <label className={labelClass}>Contact Email</label>
           <input
@@ -148,9 +181,8 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
             value={data.contactEmail}
             onChange={(e) => onChange({ ...data, contactEmail: e.target.value })}
           />
-          <p className="mt-1.5 text-xs text-gray-400">
-            This email will be used for magic link login — the primary way to access your admin
-            dashboard.
+          <p className="mt-2 text-xs text-gray-500">
+            Used for magic link login to edit your dashboard later.
           </p>
         </div>
       </div>

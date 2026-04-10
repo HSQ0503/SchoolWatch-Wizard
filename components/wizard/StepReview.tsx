@@ -8,21 +8,20 @@ type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => voi
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{children}</p>
+    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{children}</p>
   );
 }
 
 function Row({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-1.5">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm font-medium text-gray-900 text-right">{value || "—"}</span>
+      <span className="text-sm text-gray-400">{label}</span>
+      <span className="text-sm font-medium text-white text-right">{value || "—"}</span>
     </div>
   );
 }
 
 export default function StepReview({ data }: StepProps) {
-  console.log("[StepReview] Rendering. school:", data.school.name, "email:", data.contactEmail);
   const [deployState, setDeployState] = useState<DeployState>("idle");
   const [deployUrl, setDeployUrl] = useState<string | undefined>();
   const [deployError, setDeployError] = useState<string | undefined>();
@@ -39,8 +38,6 @@ export default function StepReview({ data }: StepProps) {
 
     try {
       setDeployState("creating-repo");
-
-      // Small delay so the user sees the step before the network call
       await new Promise((r) => setTimeout(r, 800));
       setDeployState("pushing-config");
       await new Promise((r) => setTimeout(r, 600));
@@ -75,49 +72,43 @@ export default function StepReview({ data }: StepProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Review & Deploy</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Double-check your configuration, then deploy your dashboard.
+        <h2 className="text-xl font-semibold text-white">Review & Deploy</h2>
+        <p className="mt-1 text-sm text-gray-400">
+          Double-check your configuration, then deploy.
         </p>
       </div>
 
       {/* Summary card */}
-      <div className="rounded-xl border border-gray-200 divide-y divide-gray-100">
-        {/* School */}
+      <div className="rounded-xl border border-white/10 divide-y divide-white/10">
         <div className="px-5 py-4 space-y-1">
           <SectionLabel>School</SectionLabel>
           <Row label="Name" value={school.name} />
           {cityState && <Row label="Location" value={cityState} />}
         </div>
 
-        {/* App */}
         <div className="px-5 py-4 space-y-1">
           <SectionLabel>App</SectionLabel>
           <Row label="App name" value={school.appName} />
         </div>
 
-        {/* Schedule */}
         <div className="px-5 py-4 space-y-1">
           <SectionLabel>Schedule</SectionLabel>
           <Row label="Day types" value={dayTypeCount} />
           <Row label="Lunch waves" value={lunchWaveCount} />
         </div>
 
-        {/* Calendar */}
         <div className="px-5 py-4 space-y-1">
           <SectionLabel>Calendar</SectionLabel>
           <Row label="No-school days" value={calendar.noSchoolDates.length} />
           <Row label="Events" value={calendar.events.length} />
         </div>
 
-        {/* Features */}
         <div className="px-5 py-4 space-y-1">
           <SectionLabel>Features</SectionLabel>
           <Row label="Events & Calendar" value={features.events ? "Enabled" : "Disabled"} />
           <Row label="Productivity Tools" value={features.productivity ? "Enabled" : "Disabled"} />
         </div>
 
-        {/* Contact */}
         <div className="px-5 py-4 space-y-1">
           <SectionLabel>Contact</SectionLabel>
           <Row label="Email" value={contactEmail} />
@@ -128,13 +119,13 @@ export default function StepReview({ data }: StepProps) {
       <button
         onClick={handleDeploy}
         disabled={!canDeploy || isDeploying}
-        className="w-full cursor-pointer rounded-xl bg-black px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
+        className="w-full cursor-pointer rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition-colors duration-150 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {isDeploying ? "Deploying..." : "Deploy Your Dashboard"}
       </button>
 
       {!canDeploy && (
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-gray-500">
           School name and contact email are required to deploy.
         </p>
       )}

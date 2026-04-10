@@ -2,6 +2,7 @@
 
 import { Component, ErrorInfo, ReactNode, useState, useEffect, ComponentType } from "react";
 import { WizardFormData } from "@/lib/types";
+import { validateStep } from "@/lib/validation";
 
 export const STEPS = [
   "School Info",
@@ -110,11 +111,16 @@ type WizardShellProps = {
 export default function WizardShell({ steps, initialData }: WizardShellProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<WizardFormData>(initialData ?? DEFAULT_FORM_DATA);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [showErrors, setShowErrors] = useState(false);
 
   const totalSteps = STEPS.length;
   const progressPercent = ((currentStep + 1) / totalSteps) * 100;
   const isFirst = currentStep === 0;
   const isLast = currentStep === totalSteps - 1;
+
+  // Re-validate whenever data or step changes (clears stale errors)
+  const currentErrors = validateStep(currentStep, data);
 
   // Debug: log step transitions
   useEffect(() => {
@@ -126,6 +132,9 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
     console.log(`[WizardShell] Step changed to ${currentStep} ("${STEPS[currentStep]}")`);
     console.log(`[WizardShell] Component:`, StepComponent?.name || StepComponent || "UNDEFINED");
     console.log(`[WizardShell] Form data snapshot:`, JSON.parse(JSON.stringify(data)));
+    // Reset error display when navigating
+    setShowErrors(false);
+    setErrors([]);
   }, [currentStep]);
 
   const StepComponent = steps[currentStep];
@@ -166,6 +175,20 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
         </div>
       </main>
 
+      {/* Validation errors */}
+      {showErrors && errors.length > 0 && (
+        <div className="px-6">
+          <div className="max-w-2xl mx-auto rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 mb-2">
+            <p className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-2">Please fix the following:</p>
+            <ul className="space-y-1">
+              {errors.map((err, i) => (
+                <li key={i} className="text-sm text-red-300">{err}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <div className="sticky bottom-0 bg-black border-t border-white/10 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
@@ -183,6 +206,12 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
           {!isLast && (
             <button
               onClick={() => {
+                if (currentErrors.length > 0) {
+                  console.log(`[WizardShell] Validation failed at step ${currentStep}:`, currentErrors);
+                  setErrors(currentErrors);
+                  setShowErrors(true);
+                  return;
+                }
                 console.log(`[WizardShell] Next clicked. ${currentStep} -> ${currentStep + 1}`);
                 setCurrentStep((s) => s + 1);
               }}
