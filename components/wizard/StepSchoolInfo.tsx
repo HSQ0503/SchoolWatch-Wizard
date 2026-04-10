@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { WizardFormData } from "@/lib/types";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
@@ -14,11 +14,35 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
   const school = data.school;
   const nameRef = useRef<HTMLInputElement>(null);
 
+  const fileRef = useRef<HTMLInputElement>(null);
+
   // Auto-focus school name on mount
   useEffect(() => { nameRef.current?.focus(); }, []);
 
   function updateSchool(patch: Partial<WizardFormData["school"]>) {
     onChange({ ...data, school: { ...school, ...patch } });
+  }
+
+  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Max 2MB
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Logo must be under 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      onChange({ ...data, logo: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+  }, [data, onChange]);
+
+  function removeLogo() {
+    onChange({ ...data, logo: undefined });
+    if (fileRef.current) fileRef.current.value = "";
   }
 
   // Auto-derive fields from school name to reduce typing
@@ -114,6 +138,52 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
               value={school.appName}
               onChange={(e) => updateSchool({ appName: e.target.value })}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Logo */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Logo</h3>
+        <div className="flex items-center gap-5">
+          {data.logo ? (
+            <div className="relative shrink-0">
+              <img
+                src={data.logo}
+                alt="School logo preview"
+                className="h-16 w-16 rounded-lg object-contain border border-white/10 bg-white/5"
+              />
+              <button
+                onClick={removeLogo}
+                className="absolute -top-2 -right-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-400 transition-colors"
+                aria-label="Remove logo"
+              >
+                x
+              </button>
+            </div>
+          ) : (
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-dashed border-white/20 bg-white/5">
+              <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+              </svg>
+            </div>
+          )}
+          <div className="flex-1">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              onChange={handleLogoUpload}
+              className="hidden"
+              id="logo-upload"
+            />
+            <label
+              htmlFor="logo-upload"
+              className="inline-block cursor-pointer rounded-lg border border-white/20 px-4 py-2 text-sm text-gray-300 transition-colors duration-150 hover:border-white/40 hover:text-white"
+            >
+              {data.logo ? "Change logo" : "Upload logo"}
+            </label>
+            <p className="mt-1.5 text-xs text-gray-500">PNG, JPG, SVG, or WebP. Max 2MB.</p>
           </div>
         </div>
       </div>

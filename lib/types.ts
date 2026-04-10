@@ -42,4 +42,5 @@ export type WizardFormData = {
     productivity: boolean;
   };
   contactEmail: string;
+  logo?: string; // base64 data URL, stripped before DB save
 };
