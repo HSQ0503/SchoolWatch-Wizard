@@ -98,6 +98,7 @@ function EditPageContent() {
     <WizardShell
       steps={STEPS}
       initialData={school!.configData as WizardFormData}
+      schoolId={school!.id}
     />
   );
 }

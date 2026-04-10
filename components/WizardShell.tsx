@@ -68,6 +68,7 @@ export const DEFAULT_FORM_DATA: WizardFormData = {
 export type StepProps = {
   data: WizardFormData;
   onChange: (data: WizardFormData) => void;
+  schoolId?: string;
 };
 
 // Error boundary to catch and log React errors
@@ -106,9 +107,10 @@ class StepErrorBoundary extends Component<
 type WizardShellProps = {
   steps: ComponentType<StepProps>[];
   initialData?: WizardFormData;
+  schoolId?: string;
 };
 
-export default function WizardShell({ steps, initialData }: WizardShellProps) {
+export default function WizardShell({ steps, initialData, schoolId }: WizardShellProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<WizardFormData>(initialData ?? DEFAULT_FORM_DATA);
   const [errors, setErrors] = useState<string[]>([]);
@@ -170,7 +172,7 @@ export default function WizardShell({ steps, initialData }: WizardShellProps) {
       <main className="flex-1 px-6 py-10">
         <div className="max-w-2xl mx-auto">
           <StepErrorBoundary stepIndex={currentStep} key={currentStep}>
-            <StepComponent key={currentStep} data={data} onChange={setData} />
+            <StepComponent key={currentStep} data={data} onChange={setData} schoolId={schoolId} />
           </StepErrorBoundary>
         </div>
       </main>

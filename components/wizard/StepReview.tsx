@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { WizardFormData } from "@/lib/types";
 import DeployProgress, { type DeployState } from "@/components/DeployProgress";
 
-type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
+type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void; schoolId?: string };
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -21,7 +21,8 @@ function Row({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-export default function StepReview({ data }: StepProps) {
+export default function StepReview({ data, schoolId }: StepProps) {
+  const isEditMode = !!schoolId;
   const [deployState, setDeployState] = useState<DeployState>("idle");
   const [deployUrl, setDeployUrl] = useState<string | undefined>();
   const [deployError, setDeployError] = useState<string | undefined>();
@@ -37,15 +38,20 @@ export default function StepReview({ data }: StepProps) {
     setDeployUrl(undefined);
 
     try {
-      setDeployState("creating-repo");
+      setDeployState(isEditMode ? "pushing-config" : "creating-repo");
       await new Promise((r) => setTimeout(r, 800));
-      setDeployState("pushing-config");
-      await new Promise((r) => setTimeout(r, 600));
+      if (!isEditMode) {
+        setDeployState("pushing-config");
+        await new Promise((r) => setTimeout(r, 600));
+      }
 
-      const res = await fetch("/api/deploy", {
+      const endpoint = isEditMode ? "/api/redeploy" : "/api/deploy";
+      const body = isEditMode ? { schoolId, data } : data;
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -57,7 +63,7 @@ export default function StepReview({ data }: StepProps) {
       setDeployState("deploying");
       await new Promise((r) => setTimeout(r, 1000));
       setDeployState("done");
-      setDeployUrl(json.deployedUrl);
+      setDeployUrl(isEditMode ? json.deployedUrl : json.deployedUrl);
     } catch (err) {
       setDeployState("error");
       setDeployError(err instanceof Error ? err.message : "Unknown error");
@@ -72,9 +78,9 @@ export default function StepReview({ data }: StepProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white">Review & Deploy</h2>
+        <h2 className="text-xl font-semibold text-white">{isEditMode ? "Review & Save" : "Review & Deploy"}</h2>
         <p className="mt-1 text-sm text-gray-400">
-          Double-check your configuration, then deploy.
+          {isEditMode ? "Double-check your changes, then save to redeploy." : "Double-check your configuration, then deploy."}
         </p>
       </div>
 
@@ -121,7 +127,7 @@ export default function StepReview({ data }: StepProps) {
         disabled={!canDeploy || isDeploying}
         className="w-full cursor-pointer rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition-colors duration-150 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {isDeploying ? "Deploying..." : "Deploy Your Dashboard"}
+        {isDeploying ? (isEditMode ? "Saving..." : "Deploying...") : (isEditMode ? "Save Changes" : "Deploy Your Dashboard")}
       </button>
 
       {!canDeploy && (
