@@ -11,6 +11,7 @@ import StepCalendar from "@/components/wizard/StepCalendar";
 import StepFeatures from "@/components/wizard/StepFeatures";
 import StepReview from "@/components/wizard/StepReview";
 import type { WizardFormData } from "@/lib/types";
+import { defaultLightColors } from "@/lib/colors";
 
 type Status = "verifying" | "loading" | "ready" | "error";
 
@@ -95,6 +96,13 @@ function EditPageContent() {
         }
 
         const schoolData = await schoolRes.json();
+        // Migrate old color format (flat { primary, accent }) to new zone format
+        const cfg = schoolData.configData;
+        if (cfg?.colors && !cfg.colors.light) {
+          const primary = cfg.colors.primary || "#003da5";
+          const accent = cfg.colors.accent || "#003da5";
+          cfg.colors = { primary, accent, light: defaultLightColors(primary, accent), dark: {} };
+        }
         setSchool(schoolData);
         setStatus("ready");
       } catch {
