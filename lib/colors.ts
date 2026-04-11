@@ -35,11 +35,12 @@ function generateDarkBg(hex: string): string {
 
 function generateDarkSurface(hex: string): string {
   const rgb = hexToRgb(hex);
-  if (!rgb) return "rgba(10, 22, 50, 0.85)";
-  const r = Math.round(rgb.r * 0.08);
-  const g = Math.round(rgb.g * 0.08);
-  const b = Math.round(rgb.b * 0.15);
-  return `rgba(${Math.max(5, r)}, ${Math.max(10, g)}, ${Math.max(20, b)}, 0.85)`;
+  if (!rgb) return "#0d1632";
+  // Blend against black at 85% opacity to produce a solid hex
+  const r = Math.round(Math.max(5, Math.round(rgb.r * 0.08)) * 0.85);
+  const g = Math.round(Math.max(10, Math.round(rgb.g * 0.08)) * 0.85);
+  const b = Math.round(Math.max(20, Math.round(rgb.b * 0.15)) * 0.85);
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
 export function defaultLightColors(primary: string, accent: string): ZoneColors {
