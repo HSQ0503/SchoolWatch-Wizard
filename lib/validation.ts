@@ -39,6 +39,13 @@ function validateColors(data: WizardFormData): string[] {
   const errors: string[] = [];
   if (!HEX_RE.test(data.colors.primary)) errors.push("Primary color must be a valid hex (e.g. #003da5)");
   if (!HEX_RE.test(data.colors.accent)) errors.push("Accent color must be a valid hex (e.g. #003da5)");
+  const zones = data.colors.light;
+  for (const [key, value] of Object.entries(zones)) {
+    if (!HEX_RE.test(value)) errors.push(`Light ${key} must be a valid hex color`);
+  }
+  for (const [key, value] of Object.entries(data.colors.dark)) {
+    if (value && !HEX_RE.test(value)) errors.push(`Dark ${key} must be a valid hex color`);
+  }
   return errors;
 }
 

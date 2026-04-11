@@ -14,6 +14,26 @@ export type WizardFormData = {
   colors: {
     primary: string;
     accent: string;
+    light: {
+      navbar: string;
+      navText: string;
+      background: string;
+      heading: string;
+      ring: string;
+      surface: string;
+      cardAccent: string;
+      badge: string;
+    };
+    dark: {
+      navbar?: string;
+      navText?: string;
+      background?: string;
+      heading?: string;
+      ring?: string;
+      surface?: string;
+      cardAccent?: string;
+      badge?: string;
+    };
   };
   schedule: {
     dayTypes: {

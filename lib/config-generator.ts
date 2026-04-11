@@ -1,5 +1,5 @@
 import type { WizardFormData } from "./types";
-import { deriveColors } from "./colors";
+import { resolveDarkColors } from "./colors";
 
 export function generateSlug(name: string): string {
   return name
@@ -101,8 +101,9 @@ function serializeEvents(
 }
 
 export function generateConfigTs(data: WizardFormData, logoPath = "/logo.png"): string {
-  const { school, colors: inputColors, lunchWaves, calendar, features } = data;
-  const colors = deriveColors(inputColors.primary, inputColors.accent);
+  const { school, lunchWaves, calendar, features } = data;
+  const lightColors = data.colors.light;
+  const darkColors = resolveDarkColors(lightColors, data.colors.dark);
   const storagePrefix = generateSlug(school.appName);
 
   const dayTypesStr = serializeDayTypes(data);
@@ -135,12 +136,26 @@ const config: SchoolConfig = {
     country: "${esc(school.country)}",
   },
   colors: {
-    primary: "${esc(colors.primary)}",
-    primaryLight: "${esc(colors.primaryLight)}",
-    accent: "${esc(colors.accent)}",
-    accentLight: "${esc(colors.accentLight)}",
-    darkBg: "${esc(colors.darkBg)}",
-    darkSurface: "${esc(colors.darkSurface)}",
+    light: {
+      navbar: "${esc(lightColors.navbar)}",
+      navText: "${esc(lightColors.navText)}",
+      background: "${esc(lightColors.background)}",
+      heading: "${esc(lightColors.heading)}",
+      ring: "${esc(lightColors.ring)}",
+      surface: "${esc(lightColors.surface)}",
+      cardAccent: "${esc(lightColors.cardAccent)}",
+      badge: "${esc(lightColors.badge)}",
+    },
+    dark: {
+      navbar: "${esc(darkColors.navbar)}",
+      navText: "${esc(darkColors.navText)}",
+      background: "${esc(darkColors.background)}",
+      heading: "${esc(darkColors.heading)}",
+      ring: "${esc(darkColors.ring)}",
+      surface: "${esc(darkColors.surface)}",
+      cardAccent: "${esc(darkColors.cardAccent)}",
+      badge: "${esc(darkColors.badge)}",
+    },
   },
   storagePrefix: "${storagePrefix}",
   schedule: {

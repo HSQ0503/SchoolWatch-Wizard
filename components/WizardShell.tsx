@@ -30,6 +30,17 @@ export const DEFAULT_FORM_DATA: WizardFormData = {
   colors: {
     primary: "#003da5",
     accent: "#003da5",
+    light: {
+      navbar: "#ffffff",
+      navText: "#003da5",
+      background: "#f5f7fa",
+      heading: "#003da5",
+      ring: "#003da5",
+      surface: "#ffffff",
+      cardAccent: "#003da5",
+      badge: "#003da5",
+    },
+    dark: {},
   },
   schedule: {
     dayTypes: [

@@ -1,3 +1,14 @@
+export type ZoneColors = {
+  navbar: string;
+  navText: string;
+  background: string;
+  heading: string;
+  ring: string;
+  surface: string;
+  cardAccent: string;
+  badge: string;
+};
+
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const match = hex.replace("#", "").match(/^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
   if (!match) return null;
@@ -13,7 +24,7 @@ export function lightenHex(hex: string, amount: number): string {
   return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
-export function generateDarkBg(hex: string): string {
+function generateDarkBg(hex: string): string {
   const rgb = hexToRgb(hex);
   if (!rgb) return "#0a1628";
   const r = Math.round(rgb.r * 0.08);
@@ -22,7 +33,7 @@ export function generateDarkBg(hex: string): string {
   return `#${Math.max(5, r).toString(16).padStart(2, "0")}${Math.max(10, g).toString(16).padStart(2, "0")}${Math.max(20, b).toString(16).padStart(2, "0")}`;
 }
 
-export function generateDarkSurface(hex: string): string {
+function generateDarkSurface(hex: string): string {
   const rgb = hexToRgb(hex);
   if (!rgb) return "rgba(10, 22, 50, 0.85)";
   const r = Math.round(rgb.r * 0.08);
@@ -31,13 +42,40 @@ export function generateDarkSurface(hex: string): string {
   return `rgba(${Math.max(5, r)}, ${Math.max(10, g)}, ${Math.max(20, b)}, 0.85)`;
 }
 
-export function deriveColors(primary: string, accent: string) {
+export function defaultLightColors(primary: string, accent: string): ZoneColors {
   return {
-    primary,
-    primaryLight: lightenHex(primary, 0.25),
-    accent,
-    accentLight: lightenHex(accent, 0.25),
-    darkBg: generateDarkBg(primary),
-    darkSurface: generateDarkSurface(primary),
+    navbar: "#ffffff",
+    navText: primary,
+    background: "#f5f7fa",
+    heading: primary,
+    ring: accent,
+    surface: "#ffffff",
+    cardAccent: accent,
+    badge: accent,
   };
+}
+
+export function deriveDarkColors(light: ZoneColors): ZoneColors {
+  const darkBg = generateDarkBg(light.heading);
+  return {
+    navbar: darkBg,
+    navText: "#ffffff",
+    background: darkBg,
+    heading: "#f1f5f9",
+    ring: lightenHex(light.ring, 0.15),
+    surface: generateDarkSurface(light.heading),
+    cardAccent: light.cardAccent,
+    badge: light.badge,
+  };
+}
+
+export function resolveDarkColors(light: ZoneColors, overrides: Partial<ZoneColors>): ZoneColors {
+  const derived = deriveDarkColors(light);
+  const result = { ...derived };
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value !== undefined) {
+      result[key as keyof ZoneColors] = value;
+    }
+  }
+  return result;
 }

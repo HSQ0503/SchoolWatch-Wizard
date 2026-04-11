@@ -1,4 +1,4 @@
-import { deriveColors } from "@/lib/colors";
+import { defaultLightColors, deriveDarkColors } from "@/lib/colors";
 import type { WizardFormData } from "@/lib/types";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
@@ -8,23 +8,37 @@ const inputClass =
 
 const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 
-const SWATCH_LABELS: Record<string, string> = {
-  primary: "Primary",
-  primaryLight: "Primary Light",
-  accent: "Accent",
-  accentLight: "Accent Light",
-  darkBg: "Dark Bg",
-  darkSurface: "Dark Surface",
+const LIGHT_SWATCH_LABELS: Record<string, string> = {
+  navbar: "Navbar",
+  navText: "Nav Text",
+  background: "Background",
+  heading: "Heading",
+  ring: "Ring",
+  surface: "Surface",
+  cardAccent: "Card Accent",
+  badge: "Badge",
 };
 
 export default function StepColors({ data, onChange }: StepProps) {
   const { primary, accent } = data.colors;
 
-  function updateColors(patch: Partial<WizardFormData["colors"]>) {
-    onChange({ ...data, colors: { ...data.colors, ...patch } });
+  function updateColors(patch: { primary?: string; accent?: string }) {
+    const newPrimary = patch.primary ?? primary;
+    const newAccent = patch.accent ?? accent;
+    const light = defaultLightColors(newPrimary || "#000000", newAccent || "#000000");
+    onChange({
+      ...data,
+      colors: {
+        ...data.colors,
+        ...patch,
+        light,
+        dark: {},
+      },
+    });
   }
 
-  const derived = deriveColors(primary || "#000000", accent || "#000000");
+  const lightColors = data.colors.light;
+  const darkColors = deriveDarkColors(lightColors);
 
   return (
     <div className="space-y-8">
@@ -88,29 +102,55 @@ export default function StepColors({ data, onChange }: StepProps) {
         </div>
       </div>
 
-      {/* Derived color preview */}
+      {/* Light palette preview */}
       <div>
         <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          Derived Palette
+          Light Palette
         </h3>
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-          {(Object.entries(SWATCH_LABELS) as [keyof typeof derived, string][]).map(
-            ([key, label]) => (
+        <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+          {Object.entries(LIGHT_SWATCH_LABELS).map(([key, label]) => {
+            const color = lightColors[key as keyof typeof lightColors];
+            return (
               <div key={key} className="flex flex-col items-center gap-1.5">
                 <div
                   className="h-14 w-full rounded-lg border border-white/10"
-                  style={{ background: derived[key] }}
-                  title={derived[key]}
+                  style={{ background: color }}
+                  title={color}
                 />
                 <span className="text-center text-xs text-gray-400 leading-tight">{label}</span>
                 <span className="text-center font-mono text-[10px] text-gray-500 truncate w-full">
-                  {derived[key].startsWith("rgba")
-                    ? derived[key].slice(0, 22) + "..."
-                    : derived[key]}
+                  {color}
                 </span>
               </div>
-            )
-          )}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Dark palette preview */}
+      <div>
+        <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Dark Palette
+        </h3>
+        <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+          {Object.entries(LIGHT_SWATCH_LABELS).map(([key, label]) => {
+            const color = darkColors[key as keyof typeof darkColors];
+            return (
+              <div key={key} className="flex flex-col items-center gap-1.5">
+                <div
+                  className="h-14 w-full rounded-lg border border-white/10"
+                  style={{ background: color }}
+                  title={color}
+                />
+                <span className="text-center text-xs text-gray-400 leading-tight">{label}</span>
+                <span className="text-center font-mono text-[10px] text-gray-500 truncate w-full">
+                  {color.startsWith("rgba")
+                    ? color.slice(0, 22) + "..."
+                    : color}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
