@@ -56,7 +56,12 @@ export async function POST(req: NextRequest) {
 
     await prisma.school.update({
       where: { id: schoolId },
-      data: { configData: dataForConfig as object, logoUrl },
+      data: {
+        name: data.school.name,
+        contactEmail: data.contactEmail,
+        configData: dataForConfig as object,
+        logoUrl,
+      },
     });
 
     return NextResponse.json({ success: true, deployedUrl: school.deployedUrl });

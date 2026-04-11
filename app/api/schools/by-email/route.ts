@@ -22,7 +22,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const school = await prisma.school.findFirst({ where: { contactEmail: email } });
+  const school = await prisma.school.findFirst({
+    where: { contactEmail: email },
+    select: { id: true, configData: true },
+  });
   if (!school) {
     return NextResponse.json({ error: "School not found" }, { status: 404 });
   }

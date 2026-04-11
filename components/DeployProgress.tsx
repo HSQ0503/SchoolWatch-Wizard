@@ -11,6 +11,7 @@ type Props = {
   state: DeployState;
   url?: string;
   error?: string;
+  isEditMode?: boolean;
 };
 
 type Step = {
@@ -31,6 +32,19 @@ const STATE_ORDER: DeployState[] = [
   "creating-repo",
   "pushing-config",
   "creating-project",
+  "deploying",
+  "done",
+];
+
+const EDIT_STEPS: Step[] = [
+  { id: "pushing-config", label: "Updating config..." },
+  { id: "deploying", label: "Building your site..." },
+  { id: "done", label: "Your changes are live!" },
+];
+
+const EDIT_STATE_ORDER: DeployState[] = [
+  "idle",
+  "pushing-config",
   "deploying",
   "done",
 ];
@@ -58,10 +72,12 @@ function PulsingDot() {
   );
 }
 
-export default function DeployProgress({ state, url, error }: Props) {
+export default function DeployProgress({ state, url, error, isEditMode }: Props) {
   if (state === "idle") return null;
 
-  const currentIndex = STATE_ORDER.indexOf(state);
+  const steps = isEditMode ? EDIT_STEPS : STEPS;
+  const stateOrder = isEditMode ? EDIT_STATE_ORDER : STATE_ORDER;
+  const currentIndex = stateOrder.indexOf(state);
 
   return (
     <div className="mt-6 space-y-4">
@@ -69,8 +85,8 @@ export default function DeployProgress({ state, url, error }: Props) {
       {state !== "error" && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-5">
           <ol className="space-y-4">
-            {STEPS.map((step) => {
-              const stepIndex = STATE_ORDER.indexOf(step.id);
+            {steps.map((step) => {
+              const stepIndex = stateOrder.indexOf(step.id);
               const isDone = currentIndex > stepIndex;
               const isCurrent = currentIndex === stepIndex;
 

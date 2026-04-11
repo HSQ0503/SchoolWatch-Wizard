@@ -12,6 +12,15 @@ export async function POST(req: NextRequest) {
     const data: WizardFormData = await req.json();
 
     const slug = generateSlug(data.school.name);
+
+    const existing = await prisma.school.findFirst({ where: { slug } });
+    if (existing) {
+      return NextResponse.json(
+        { error: "A school with this name already exists" },
+        { status: 409 }
+      );
+    }
+
     const repoName = "schoolwatch-" + slug;
 
     const repo = await createRepoFromTemplate(repoName);

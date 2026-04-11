@@ -55,8 +55,8 @@ export default function StepReview({ data, schoolId }: StepProps) {
       });
 
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? `Request failed (${res.status})`);
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error ?? `Request failed (${res.status})`);
       }
 
       const json = await res.json();
@@ -136,7 +136,7 @@ export default function StepReview({ data, schoolId }: StepProps) {
         </p>
       )}
 
-      <DeployProgress state={deployState} url={deployUrl} error={deployError} />
+      <DeployProgress state={deployState} url={deployUrl} error={deployError} isEditMode={isEditMode} />
     </div>
   );
 }

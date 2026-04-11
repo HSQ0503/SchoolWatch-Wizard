@@ -44,28 +44,43 @@ function EditPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [status, setStatus] = useState<Status>(() => token ? "verifying" : "error");
+  const [status, setStatus] = useState<Status>("verifying");
   const [school, setSchool] = useState<{ id: string; configData: WizardFormData } | null>(null);
-  const [error, setError] = useState(() => token ? "" : "No login token provided");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!token) return;
-
     async function load() {
       try {
-        const verifyRes = await fetch("/api/auth/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-        });
+        let email: string | null = null;
 
-        if (!verifyRes.ok) {
-          setError("Invalid or expired link");
+        // Path A: verify magic link token (sets session cookie)
+        if (token) {
+          const verifyRes = await fetch("/api/auth/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          });
+
+          if (verifyRes.ok) {
+            const data = await verifyRes.json();
+            email = data.email;
+          }
+        }
+
+        // Path B: fall back to existing session cookie
+        if (!email) {
+          const sessionRes = await fetch("/api/auth/session");
+          if (sessionRes.ok) {
+            const data = await sessionRes.json();
+            email = data.email;
+          }
+        }
+
+        if (!email) {
+          setError(token ? "Invalid or expired link. Please request a new one." : "Please log in to edit your dashboard.");
           setStatus("error");
           return;
         }
-
-        const { email } = await verifyRes.json();
 
         setStatus("loading");
 
@@ -79,8 +94,8 @@ function EditPageContent() {
           return;
         }
 
-        const data = await schoolRes.json();
-        setSchool(data);
+        const schoolData = await schoolRes.json();
+        setSchool(schoolData);
         setStatus("ready");
       } catch {
         setError("Something went wrong. Please try again.");
