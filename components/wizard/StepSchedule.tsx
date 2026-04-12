@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import type { WizardFormData } from "@/lib/types";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
@@ -8,10 +8,15 @@ type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => voi
 type Period = { name: string; start: string; end: string };
 
 const inputClass =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150";
+  "w-full rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] transition-colors focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)]";
+
+const labelClass =
+  "block text-xs text-[color:var(--color-text-faded)] mb-1.5";
+
+const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 const timeInputClass =
-  "w-[7.5rem] shrink-0 rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150";
+  "w-[7.5rem] shrink-0 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)] [color-scheme:dark]";
 
 const WEEKDAYS = [
   { label: "M", value: 1 },
@@ -75,21 +80,25 @@ function PeriodList({
   emptyMessage = "No periods yet. Click below to add one.",
 }: PeriodListProps) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
+    <div style={fontMono}>
+      <label className="mb-1 block text-xs text-[color:var(--color-text-faded)] uppercase tracking-[0.1em]">
+        {label}
+      </label>
       {description && (
-        <p className="text-xs text-gray-500 mb-2">{description}</p>
+        <p className="mb-2 text-[11px] text-[color:var(--color-text-faded)]">{description}</p>
       )}
       <div className="space-y-2">
         {periods.length === 0 && (
-          <p className="text-sm text-gray-500 italic">{emptyMessage}</p>
+          <p className="text-[12px] italic text-[color:var(--color-text-faded)]">
+            {emptyMessage}
+          </p>
         )}
         {periods.map((period, i) => (
           <div key={i} className="flex items-center gap-2">
             <input
               className={inputClass}
               type="text"
-              placeholder="Period name"
+              placeholder="period name"
               value={period.name}
               onChange={(e) => onUpdate(i, { name: e.target.value })}
             />
@@ -110,7 +119,7 @@ function PeriodList({
             <button
               onClick={() => onRemove(i)}
               aria-label={`Remove period ${i + 1}`}
-              className="cursor-pointer shrink-0 rounded-lg p-2 text-gray-600 transition-colors duration-150 hover:bg-white/5 hover:text-red-400"
+              className="cursor-pointer shrink-0 rounded-[3px] p-1.5 text-[color:var(--color-text-faded)] hover:bg-[color:var(--color-bg-input)] hover:text-[color:var(--color-accent)]"
             >
               <TrashIcon />
             </button>
@@ -119,9 +128,9 @@ function PeriodList({
       </div>
       <button
         onClick={onAdd}
-        className="mt-3 cursor-pointer rounded-lg border border-dashed border-white/20 px-4 py-2 text-sm text-gray-500 transition-colors duration-150 hover:border-white/30 hover:text-gray-300"
+        className="mt-3 cursor-pointer text-xs uppercase tracking-[0.12em] text-[color:var(--color-accent)] hover:brightness-110"
       >
-        {addLabel}
+        [+] {addLabel.replace(/^\+ /, "")}
       </button>
     </div>
   );
@@ -229,56 +238,72 @@ export default function StepSchedule({ data, onChange }: StepProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-white">Bell Schedule</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          {lunchWavesEnabled
-            ? "Define periods before lunch, per-wave lunch periods, and periods after lunch."
-            : "Define day types (e.g. Regular, Early Release) and their periods."}
-        </p>
+    <div className="space-y-6" style={fontMono}>
+      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
+        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
+          <span className="text-[color:var(--color-text-faded)] font-normal">// </span>
+          schedule
+        </h2>
+        <span className="text-[12px] text-[color:var(--color-text-faded)]">
+          — day types and their bell times.{" "}
+          {lunchWavesEnabled ? "lunch waves enabled." : "rotating schedules handled."}
+        </span>
       </div>
 
-      {/* Day type tabs */}
-      <div className="flex flex-wrap items-center gap-2">
-        {dayTypes.map((dt, i) => (
-          <button
-            key={dt.id}
-            onClick={() => setActiveDayTypeIndex(i)}
-            className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-150 ${
-              i === activeDayTypeIndex
-                ? "bg-white text-black"
-                : "border border-white/20 text-gray-400 hover:text-white hover:border-white/40"
-            }`}
-          >
-            {dt.label || "Untitled"}
-          </button>
-        ))}
+      {/* Day type cards */}
+      <div>
+        <div className="mb-2.5 text-[11px] uppercase tracking-[0.1em] text-[color:var(--color-text-faded)]">
+          day types
+        </div>
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {dayTypes.map((dt, i) => {
+            const selected = i === activeDayTypeIndex;
+            return (
+              <button
+                key={dt.id}
+                onClick={() => setActiveDayTypeIndex(i)}
+                className={`cursor-pointer rounded-[3px] border p-3 text-left transition-colors ${
+                  selected
+                    ? "border-[color:var(--color-accent)] shadow-[inset_0_0_0_1px_var(--color-accent)]"
+                    : "border-[color:var(--color-line-strong)]"
+                } bg-[color:var(--color-bg-input)]`}
+              >
+                <div className="text-[10px] uppercase tracking-[0.1em] text-[color:var(--color-text-faded)]">
+                  type_{(i + 1).toString().padStart(2, "0")}
+                </div>
+                <div className="mt-1 text-sm font-bold text-[color:var(--color-foreground)]">
+                  {dt.label || "Untitled"}
+                </div>
+                <div className="mt-1.5 text-[10px] text-[color:var(--color-text-faded)]">
+                  weekdays: {dt.weekdays.length === 0 ? "—" : dt.weekdays.map((d) => ["", "mon", "tue", "wed", "thu", "fri"][d]).join(" ")}
+                </div>
+              </button>
+            );
+          })}
+        </div>
         <button
           onClick={addDayType}
-          className="cursor-pointer rounded-lg border border-dashed border-white/20 px-4 py-2 text-sm text-gray-500 transition-colors duration-150 hover:border-white/30 hover:text-gray-300"
+          className="mt-3 cursor-pointer text-xs uppercase tracking-[0.12em] text-[color:var(--color-accent)] hover:brightness-110"
         >
-          + Add Day Type
+          [+] add day type
         </button>
       </div>
 
       {activeDayType && (
-        <div className="space-y-5 rounded-xl border border-white/10 bg-white/5 p-5">
-          {/* Label */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Day Type Label</label>
+        <div className="space-y-5 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] p-5">
+          <div className="grid grid-cols-[180px_1fr] items-center gap-4">
+            <div className={labelClass}>label</div>
             <input
               className={inputClass}
               type="text"
-              placeholder="e.g. Regular Day"
+              placeholder="Regular Day"
               value={activeDayType.label}
               onChange={(e) => updateDayTypeLabel(e.target.value)}
             />
           </div>
 
-          {/* Weekday toggles */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Active Weekdays</label>
+          <div className="grid grid-cols-[180px_1fr] items-center gap-4">
+            <div className={labelClass}>weekdays</div>
             <div className="flex gap-2">
               {WEEKDAYS.map(({ label, value }) => {
                 const active = activeDayType.weekdays.includes(value);
@@ -287,10 +312,10 @@ export default function StepSchedule({ data, onChange }: StepProps) {
                     key={value}
                     onClick={() => toggleWeekday(value)}
                     aria-pressed={active}
-                    className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-colors duration-150 ${
+                    className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-[3px] border text-xs ${
                       active
-                        ? "bg-white text-black"
-                        : "border border-white/20 text-gray-500 hover:text-white hover:border-white/40"
+                        ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-black font-bold"
+                        : "border-[color:var(--color-line-strong)] text-[color:var(--color-text-faded)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
                     }`}
                   >
                     {label}
@@ -300,64 +325,64 @@ export default function StepSchedule({ data, onChange }: StepProps) {
             </div>
           </div>
 
-          {/* Periods — layout depends on lunch waves */}
           {!lunchWavesEnabled ? (
             <PeriodList
               periods={sharedPeriods}
-              label="Periods"
+              label="periods"
               onAdd={addSharedPeriod}
               onRemove={removeSharedPeriod}
               onUpdate={updateSharedPeriod}
+              addLabel="add period"
             />
           ) : (
             <div className="space-y-5">
               <PeriodList
                 periods={sharedPeriods}
-                label="Before Lunch"
+                label="before lunch"
                 description="Periods everyone has at the same time, before lunch starts."
                 onAdd={addSharedPeriod}
                 onRemove={removeSharedPeriod}
                 onUpdate={updateSharedPeriod}
-                emptyMessage="No before-lunch periods yet."
+                addLabel="add period"
+                emptyMessage="no before-lunch periods yet."
               />
-
               {waveOptions.map((wave) => (
                 <div
                   key={wave.id}
-                  className="rounded-lg border border-white/10 bg-white/5 p-4"
+                  className="rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-background)] p-4"
                 >
                   <PeriodList
                     periods={getWavePeriods(wave.id)}
-                    label={`Lunch Wave: ${wave.label || wave.id}`}
-                    description="Periods for students in this wave during the lunch split (usually lunch + an adjacent class)."
+                    label={`lunch wave: ${wave.label || wave.id}`}
+                    description="Periods for students in this wave during the lunch split."
                     onAdd={() => addWavePeriod(wave.id)}
                     onRemove={(i) => removeWavePeriod(wave.id, i)}
                     onUpdate={(i, patch) => updateWavePeriod(wave.id, i, patch)}
-                    emptyMessage="No periods for this wave yet."
+                    addLabel="add period"
+                    emptyMessage="no periods for this wave yet."
                   />
                 </div>
               ))}
-
               <PeriodList
                 periods={afterPeriods}
-                label="After Lunch"
+                label="after lunch"
                 description="Periods everyone has at the same time, after lunch ends."
                 onAdd={addAfterPeriod}
                 onRemove={removeAfterPeriod}
                 onUpdate={updateAfterPeriod}
-                emptyMessage="No after-lunch periods yet."
+                addLabel="add period"
+                emptyMessage="no after-lunch periods yet."
               />
             </div>
           )}
 
-          {/* Remove day type */}
           {dayTypes.length > 1 && (
-            <div className="pt-2 border-t border-white/10">
+            <div className="border-t border-[color:var(--color-line)] pt-3">
               <button
                 onClick={() => removeDayType(activeDayTypeIndex)}
-                className="cursor-pointer text-sm text-red-400/70 underline-offset-2 hover:text-red-400 hover:underline transition-colors duration-150"
+                className="cursor-pointer text-xs text-[color:var(--color-accent)]/80 underline-offset-2 hover:text-[color:var(--color-accent)] hover:underline"
               >
-                Remove this day type
+                remove this day type
               </button>
             </div>
           )}
