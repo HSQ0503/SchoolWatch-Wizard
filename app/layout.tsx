@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { Geist_Mono, Fraunces, Archivo_Black, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
+const archivoBlack = Archivo_Black({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
+  weight: ["400"],
+  variable: "--font-archivo-black",
 });
 
-const geistMono = Geist_Mono({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-geist-mono",
+  weight: ["400", "500", "700"],
+  variable: "--font-jetbrains-mono",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  variable: "--font-caveat",
 });
 
 const fraunces = Fraunces({
@@ -17,6 +25,12 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
+});
+
+// Kept for possible future use; the wizard now uses JetBrains Mono directly.
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -33,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} font-sans min-h-full`}
+        className={`${archivoBlack.variable} ${jetbrainsMono.variable} ${caveat.variable} ${fraunces.variable} ${geistMono.variable} font-sans min-h-full`}
       >
         {children}
       </body>
