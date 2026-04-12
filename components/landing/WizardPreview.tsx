@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  type Variants,
+} from "motion/react";
 import SectionDivider from "./SectionDivider";
 
 type Step = {
@@ -39,6 +44,30 @@ const STEPS: Step[] = [
   },
 ];
 
+const row: Variants = {
+  hidden: { opacity: 0.5 },
+  visible: { opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
+const numeral: Variants = {
+  hidden: { color: "rgba(255,255,255,0.3)" },
+  visible: {
+    color: "#ffffff",
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
+};
+
+const thumb: Variants = {
+  hidden: { opacity: 0.5, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
+const VIEWPORT = { once: true, amount: 0.55 } as const;
+
 export default function WizardPreview() {
   const ref = useRef<HTMLDivElement>(null);
   const shouldReduce = useReducedMotion();
@@ -48,13 +77,8 @@ export default function WizardPreview() {
     offset: ["start 70%", "end 30%"],
   });
 
-  const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
   return (
-    <section
-      aria-label="How it works"
-      className="relative px-6 py-28"
-    >
+    <section aria-label="How it works" className="relative px-6 py-28">
       <SectionDivider />
       <div className="mx-auto max-w-4xl">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--color-label)]">
@@ -68,14 +92,14 @@ export default function WizardPreview() {
         </h2>
 
         <div ref={ref} className="relative mt-20">
-          {/* Vertical progress line */}
+          {/* Vertical progress track with scroll-tied crimson fill */}
           <div
             aria-hidden="true"
-            className="absolute left-4 top-0 h-full w-[2px] origin-top bg-[color:var(--color-border-hairline)] sm:left-6"
+            className="absolute left-4 top-0 h-full w-[2px] bg-[color:var(--color-border-hairline)] sm:left-6"
           >
             <motion.div
               style={{
-                scaleY: shouldReduce ? 1 : progressScale,
+                scaleY: shouldReduce ? 1 : scrollYProgress,
                 transformOrigin: "top",
               }}
               className="h-full w-full bg-[color:var(--color-accent)]"
@@ -86,18 +110,15 @@ export default function WizardPreview() {
             {STEPS.map((s) => (
               <li key={s.n}>
                 <motion.div
-                  initial={shouldReduce ? false : { opacity: 0.5 }}
-                  whileInView={shouldReduce ? undefined : { opacity: 1 }}
-                  viewport={{ once: false, amount: 0.55, margin: "0px 0px -20% 0px" }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  initial={shouldReduce ? false : "hidden"}
+                  whileInView={shouldReduce ? undefined : "visible"}
+                  viewport={VIEWPORT}
+                  variants={row}
                   className="grid grid-cols-[auto_1fr] gap-6 pl-12 sm:gap-10 sm:pl-16"
                 >
                   <motion.p
-                    initial={shouldReduce ? false : { color: "rgba(255,255,255,0.3)" }}
-                    whileInView={shouldReduce ? undefined : { color: "#ffffff" }}
-                    viewport={{ once: false, amount: 0.55 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="-ml-12 w-12 text-right font-mono text-3xl font-semibold leading-none sm:-ml-16 sm:w-16 sm:text-4xl font-[family-name:var(--font-display)]"
+                    variants={numeral}
+                    className="-ml-12 w-12 text-right font-mono text-3xl font-semibold leading-none text-white sm:-ml-16 sm:w-16 sm:text-4xl font-[family-name:var(--font-display)]"
                     style={{ fontVariationSettings: '"opsz" 72' }}
                   >
                     {s.n}
@@ -105,10 +126,8 @@ export default function WizardPreview() {
 
                   <div>
                     <motion.div
-                      initial={shouldReduce ? false : { opacity: 0.5, scale: 0.96 }}
-                      whileInView={shouldReduce ? undefined : { opacity: 1, scale: 1 }}
-                      viewport={{ once: false, amount: 0.55 }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      variants={thumb}
+                      style={{ willChange: "transform" }}
                       className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border border-[color:var(--color-border-hairline)] bg-black/40"
                     >
                       <Image
