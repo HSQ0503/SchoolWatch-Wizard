@@ -1,6 +1,7 @@
 import Hero from "@/components/landing/Hero";
 import LakerWatchShowcase from "@/components/landing/LakerWatchShowcase";
 import Noise from "@/components/landing/Noise";
+import WizardPreview from "@/components/landing/WizardPreview";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <Noise />
       <Hero />
       <LakerWatchShowcase />
+      <WizardPreview />
     </main>
   );
 }
