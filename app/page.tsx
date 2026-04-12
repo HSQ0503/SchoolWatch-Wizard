@@ -1,3 +1,4 @@
+import Faq from "@/components/landing/Faq";
 import Hero from "@/components/landing/Hero";
 import LakerWatchShowcase from "@/components/landing/LakerWatchShowcase";
 import Noise from "@/components/landing/Noise";
@@ -12,6 +13,7 @@ export default function Home() {
       <LakerWatchShowcase />
       <WizardPreview />
       <PullQuote />
+      <Faq />
     </main>
   );
 }
