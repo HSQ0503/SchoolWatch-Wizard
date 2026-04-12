@@ -17,8 +17,15 @@ type Props = {
 
 // Map step index → (top-level key, fallback regex anchor).
 // The generator emits keys in a fixed order; we find the matching line block.
-const STEP_ANCHORS: { key: string; startPattern: RegExp; endPattern: RegExp }[] = [
-  { key: "school", startPattern: /^  school: \{/, endPattern: /^  \},$/ },                   // step 0
+// `endAfterBlocks` = how many `endPattern` matches to consume before stopping.
+// Step 0 spans both `school:` and `location:` because StepSchoolInfo edits both.
+const STEP_ANCHORS: {
+  key: string;
+  startPattern: RegExp;
+  endPattern: RegExp;
+  endAfterBlocks?: number;
+}[] = [
+  { key: "school", startPattern: /^  school: \{/, endPattern: /^  \},$/, endAfterBlocks: 2 }, // step 0 — school + location
   { key: "colors", startPattern: /^  colors: \{/, endPattern: /^  \},$/ },                   // step 1
   { key: "schedule", startPattern: /^  schedule: \{/, endPattern: /^  \},$/ },               // step 2
   { key: "lunchWaves", startPattern: /^  lunchWaves: \{/, endPattern: /^  \},$/ },           // step 3
@@ -103,23 +110,29 @@ export default function ConfigPreview({ data, activeStep }: Props) {
     if (!anchor) return null;
     const start = lines.findIndex((l) => anchor.startPattern.test(l));
     if (start < 0) return null;
-    // endPattern matches "  }," — find the first one at or after start+1
+    const needed = anchor.endAfterBlocks ?? 1;
+    let seen = 0;
     for (let i = start + 1; i < lines.length; i++) {
-      if (anchor.endPattern.test(lines[i])) return { start, end: i };
+      if (anchor.endPattern.test(lines[i])) {
+        seen++;
+        if (seen >= needed) return { start, end: i };
+      }
     }
     return { start, end: lines.length - 1 };
   }, [lines, activeStep]);
 
-  // Scroll the highlighted block into view on step change.
+  // Scroll the highlighted block into view on step change. Respects reduced motion.
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!range || !containerRef.current) return;
     const el = containerRef.current.querySelector(
       `[data-line="${range.start}"]`
     ) as HTMLElement | null;
-    if (el) {
-      el.scrollIntoView({ block: "center", behavior: "smooth" });
-    }
+    if (!el) return;
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ block: "center", behavior: prefersReduced ? "auto" : "smooth" });
   }, [range]);
 
   return (
