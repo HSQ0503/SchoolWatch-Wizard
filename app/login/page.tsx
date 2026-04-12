@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import WizardTopBar from "@/components/wizard/WizardTopBar";
 
 type Status = "idle" | "sending" | "sent" | "error";
+
+const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,9 +28,11 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error === "School not found"
-          ? "No school found with that email. Use the email you entered when setting up your dashboard."
-          : body?.error ?? "Something went wrong");
+        throw new Error(
+          body?.error === "School not found"
+            ? "No school found with that email. Use the email you entered when setting up your dashboard."
+            : body?.error ?? "Something went wrong"
+        );
       }
 
       setStatus("sent");
@@ -38,60 +43,83 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold text-white text-center">
-          Edit Your Dashboard
-        </h1>
-        <p className="mt-2 text-sm text-gray-400 text-center">
-          Enter the email you used when setting up your school. We&apos;ll send a magic link to edit your config.
-        </p>
+    <div
+      className="flex min-h-screen flex-col bg-[color:var(--background)] text-[color:var(--color-foreground)]"
+      style={{
+        backgroundImage:
+          "linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)",
+        backgroundSize: "32px 32px",
+      }}
+    >
+      <WizardTopBar />
 
-        {status === "sent" ? (
-          <div className="mt-8 rounded-xl border border-green-500/30 bg-green-500/10 p-5 text-center">
-            <p className="text-sm font-semibold text-green-400">Check your inbox</p>
-            <p className="mt-1 text-sm text-green-300/70">
-              We sent a login link to <strong className="text-green-300">{email}</strong>. It expires in 15 minutes.
+      <main className="flex flex-1 items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md" style={fontMono}>
+          <div className="mb-6 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
+            <h1 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
+              <span className="text-[color:var(--color-text-faded)] font-normal">// </span>
+              auth
+            </h1>
+            <p className="mt-2 text-sm text-[color:var(--color-text-dim)]">
+              edit your dashboard. we&apos;ll email you a magic link.
             </p>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1.5">
-                Contact Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@school.edu"
-                className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150"
-              />
+
+          {status === "sent" ? (
+            <div className="rounded-[3px] border border-[color:var(--color-ok)]/40 bg-[rgba(16,185,129,0.08)] p-5">
+              <p className="text-sm font-bold text-[color:var(--color-ok)]">
+                ✓ check your inbox
+              </p>
+              <p className="mt-2 text-[13px] text-[color:var(--color-text-dim)]">
+                sent a login link to{" "}
+                <strong className="text-[color:var(--color-foreground)]">{email}</strong>.
+                expires in 15 min.
+              </p>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                <label htmlFor="email" className="text-xs text-[color:var(--color-text-faded)]">
+                  contact_email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@school.edu"
+                  className="rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)]"
+                  style={fontMono}
+                />
+              </div>
 
-            {status === "error" && (
-              <p className="text-sm text-red-400">{error}</p>
-            )}
+              {status === "error" && (
+                <p className="text-[13px] text-[color:var(--color-accent)]">✗ {error}</p>
+              )}
 
-            <button
-              type="submit"
-              disabled={status === "sending" || !email.trim()}
-              className="w-full cursor-pointer rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-colors duration-150 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
+              <button
+                type="submit"
+                disabled={status === "sending" || !email.trim()}
+                className="w-full cursor-pointer rounded-[3px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.08em] text-black hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                style={fontMono}
+              >
+                {status === "sending" ? "sending..." : "send magic link →"}
+              </button>
+            </form>
+          )}
+
+          <p className="mt-8 text-center text-[11px] text-[color:var(--color-text-faded)]">
+            no dashboard yet?{" "}
+            <a
+              href="/setup"
+              className="text-[color:var(--color-accent)] underline underline-offset-2 hover:brightness-110"
             >
-              {status === "sending" ? "Sending..." : "Send Magic Link"}
-            </button>
-          </form>
-        )}
-
-        <p className="mt-6 text-center text-xs text-gray-600">
-          Don&apos;t have a dashboard yet?{" "}
-          <a href="/setup" className="text-gray-400 underline underline-offset-2 hover:text-white transition-colors duration-150">
-            Create one
-          </a>
-        </p>
-      </div>
+              create one
+            </a>
+          </p>
+        </div>
+      </main>
     </div>
   );
 }
