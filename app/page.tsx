@@ -1,5 +1,6 @@
 import Faq from "@/components/landing/Faq";
 import FinalCta from "@/components/landing/FinalCta";
+import Footer from "@/components/landing/Footer";
 import Hero from "@/components/landing/Hero";
 import LakerWatchShowcase from "@/components/landing/LakerWatchShowcase";
 import Noise from "@/components/landing/Noise";
@@ -16,6 +17,7 @@ export default function Home() {
       <PullQuote />
       <Faq />
       <FinalCta />
+      <Footer />
     </main>
   );
 }
