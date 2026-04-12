@@ -14,7 +14,7 @@ export default function FinalCta() {
         <div className="mt-12">
           <Link
             href="/setup"
-            className="inline-block rounded-lg bg-[color:var(--color-accent)] px-8 py-4 text-base font-semibold text-black transition-transform duration-150 hover:scale-[1.02]"
+            className="inline-block rounded-lg bg-[color:var(--color-accent)] px-8 py-4 text-base font-semibold text-black transition-transform duration-150 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
           >
             Start Yours →
           </Link>

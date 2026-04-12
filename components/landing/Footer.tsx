@@ -8,7 +8,7 @@ export default function Footer() {
             href="https://github.com/HSQ0503/schoolwatch-wizard"
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
           >
             GitHub
           </a>
@@ -16,7 +16,7 @@ export default function Footer() {
             href="https://lakerwatch.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
           >
             See LakerWatch
           </a>

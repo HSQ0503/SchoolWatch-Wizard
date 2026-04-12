@@ -105,7 +105,7 @@ export default function LakerWatchShowcase() {
             href="https://lakerwatch.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs uppercase tracking-wider text-[color:var(--color-label)] transition-colors hover:text-white"
+            className="font-mono text-xs uppercase tracking-wider text-[color:var(--color-label)] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
           >
             lakerwatch.com →
           </a>

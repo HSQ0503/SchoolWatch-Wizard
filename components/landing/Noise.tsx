@@ -7,7 +7,7 @@ const NOISE_SVG =
 export default function Noise() {
   return (
     <div
-      aria-hidden
+      aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-[1] opacity-[0.04] mix-blend-screen"
       style={{ backgroundImage: `url("${NOISE_SVG}")` }}
     />

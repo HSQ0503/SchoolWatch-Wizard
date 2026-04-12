@@ -27,7 +27,7 @@ export default function Hero() {
           <div className="mt-10 flex flex-wrap items-center gap-5">
             <Link
               href="/setup"
-              className="rounded-lg bg-[color:var(--color-accent)] px-6 py-3 text-sm font-semibold text-black transition-transform duration-150 hover:scale-[1.02]"
+              className="rounded-lg bg-[color:var(--color-accent)] px-6 py-3 text-sm font-semibold text-black transition-transform duration-150 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
             >
               Start Yours →
             </Link>
@@ -35,7 +35,7 @@ export default function Hero() {
               href="https://lakerwatch.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+              className="text-sm font-medium text-white/80 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
             >
               See LakerWatch →
             </a>
