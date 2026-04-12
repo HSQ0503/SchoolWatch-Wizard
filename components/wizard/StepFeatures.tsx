@@ -1,3 +1,4 @@
+import React from "react";
 import type { WizardFormData } from "@/lib/types";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
@@ -21,20 +22,7 @@ const FEATURES: Feature[] = [
   },
 ];
 
-function CheckIcon({ checked }: { checked: boolean }) {
-  if (!checked) {
-    return (
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-white/20 transition-colors duration-150" />
-    );
-  }
-  return (
-    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-white bg-white transition-colors duration-150">
-      <svg className="h-3 w-3 text-black" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
-  );
-}
+const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 export default function StepFeatures({ data, onChange }: StepProps) {
   function toggle(key: keyof WizardFormData["features"]) {
@@ -42,15 +30,18 @@ export default function StepFeatures({ data, onChange }: StepProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-white">Features</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          Choose which optional features to include in your dashboard.
-        </p>
+    <div className="space-y-6" style={fontMono}>
+      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
+        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
+          <span className="text-[color:var(--color-text-faded)] font-normal">// </span>
+          features
+        </h2>
+        <span className="text-[12px] text-[color:var(--color-text-faded)]">
+          — optional modules. countdown and schedule are always on.
+        </span>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {FEATURES.map(({ key, title, description }) => {
           const checked = data.features[key];
           return (
@@ -58,25 +49,30 @@ export default function StepFeatures({ data, onChange }: StepProps) {
               key={key}
               onClick={() => toggle(key)}
               aria-pressed={checked}
-              className={`cursor-pointer w-full flex items-center gap-4 rounded-xl border-2 px-5 py-4 text-left transition-all duration-150 ${
+              className={`flex w-full cursor-pointer items-start gap-3 border px-4 py-3 text-left transition-colors ${
                 checked
-                  ? "border-white bg-white/10"
-                  : "border-white/10 hover:border-white/20"
+                  ? "border-[color:var(--color-accent)] bg-[rgba(255,99,99,0.05)]"
+                  : "border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] hover:border-[color:var(--color-accent)]"
               }`}
+              style={fontMono}
             >
-              <CheckIcon checked={checked} />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white">{title}</p>
-                <p className="mt-0.5 text-sm text-gray-400">{description}</p>
+              <span
+                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border text-[10px] font-bold ${
+                  checked
+                    ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-black"
+                    : "border-[color:var(--color-text-faded)] text-transparent"
+                }`}
+              >
+                ✓
+              </span>
+              <div>
+                <p className="text-sm font-bold text-[color:var(--color-foreground)]">{title}</p>
+                <p className="mt-0.5 text-xs text-[color:var(--color-text-faded)]">{description}</p>
               </div>
             </button>
           );
         })}
       </div>
-
-      <p className="text-xs text-gray-500">
-        The countdown timer and bell schedule are always included.
-      </p>
     </div>
   );
 }
