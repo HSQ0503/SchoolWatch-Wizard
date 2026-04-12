@@ -1,4 +1,10 @@
-const CALLOUTS = [
+type Callout = {
+  position: string;
+  title: string;
+  body: string;
+};
+
+const CALLOUTS: Callout[] = [
   {
     position: "top-[18%] left-[-12%]",
     title: "Live countdown ring",
@@ -32,10 +38,9 @@ export default function LakerWatchShowcase() {
           A real student-built dashboard. Running right now.
         </h2>
 
-        {/* Screenshot + absolutely-positioned callouts (desktop only) */}
-        <div className="relative mx-auto mt-20 hidden w-full max-w-3xl md:block">
+        {/* Desktop (lg+): screenshot + absolutely-positioned callouts */}
+        <div className="relative mx-auto mt-20 hidden w-full max-w-3xl lg:block">
           <div className="relative aspect-[16/10] w-full rounded-xl border border-[color:var(--color-border-hairline)] bg-[color:var(--color-surface)] shadow-2xl">
-            {/* Window chrome — decorative */}
             <div
               aria-hidden="true"
               className="flex items-center gap-1.5 border-b border-[color:var(--color-border-hairline)] px-3 py-2.5"
@@ -55,7 +60,7 @@ export default function LakerWatchShowcase() {
           {CALLOUTS.map((c) => (
             <div
               key={c.title}
-              className={`absolute ${c.position} hidden w-44 rounded-lg border border-[color:var(--color-border-hairline)] bg-black/80 p-3 backdrop-blur lg:block`}
+              className={`absolute ${c.position} w-44 rounded-lg border border-[color:var(--color-border-hairline)] bg-black/80 p-3 backdrop-blur`}
             >
               <p className="text-[13px] font-semibold text-white">{c.title}</p>
               <p className="mt-1 text-xs leading-relaxed text-[color:var(--color-body)]">
@@ -65,10 +70,9 @@ export default function LakerWatchShowcase() {
           ))}
         </div>
 
-        {/* Mobile / tablet: screenshot + list below */}
-        <div className="mt-16 md:hidden">
+        {/* Tablet / mobile (< lg): screenshot + list */}
+        <div className="mt-16 lg:hidden">
           <div className="relative aspect-[16/10] w-full rounded-xl border border-[color:var(--color-border-hairline)] bg-[color:var(--color-surface)]">
-            {/* Window chrome — decorative */}
             <div
               aria-hidden="true"
               className="flex items-center gap-1.5 border-b border-[color:var(--color-border-hairline)] px-3 py-2"
@@ -78,7 +82,7 @@ export default function LakerWatchShowcase() {
               <span className="h-2 w-2 rounded-full bg-white/10" />
             </div>
             <div className="flex h-[calc(100%-1.75rem)] items-center justify-center text-xs text-white/20">
-              LakerWatch dashboard
+              LakerWatch dashboard (placeholder)
             </div>
           </div>
           <ul className="mt-8 space-y-5">
