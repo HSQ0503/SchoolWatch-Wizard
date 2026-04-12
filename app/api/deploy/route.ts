@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateSlug, generateConfigTs } from "@/lib/config-generator";
 import { createRepoFromTemplate, waitForRepoReady, pushFile, pushLogo } from "@/lib/github";
-import { createProject } from "@/lib/vercel";
+import { createProject, triggerDeployment } from "@/lib/vercel";
 import { createMagicLinkToken, getMagicLinkUrl } from "@/lib/auth";
 import { sendMagicLinkEmail } from "@/lib/email";
 import type { WizardFormData } from "@/lib/types";
@@ -57,6 +57,14 @@ export async function POST(req: NextRequest) {
 
     const configContent = generateConfigTs(dataForConfig, logoPath);
     await pushFile(repoName, "school.config.ts", configContent, "Configure school via wizard");
+
+    // Explicitly trigger the first deployment — Vercel's git webhook may not be
+    // registered in time to catch the config push commit on a new project
+    try {
+      await triggerDeployment(repoName, repo.fullName);
+    } catch (deployErr) {
+      console.error("[deploy] Failed to trigger initial deployment:", deployErr);
+    }
 
     const school = await prisma.school.create({
       data: {

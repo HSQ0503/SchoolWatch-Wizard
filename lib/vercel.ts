@@ -68,6 +68,40 @@ export async function getLatestDeployment(
   };
 }
 
+export async function triggerDeployment(
+  projectName: string,
+  gitRepoFullName: string,
+  ref = "main"
+): Promise<{ deploymentId: string; url: string }> {
+  const res = await fetch(`${BASE}/v13/deployments${teamParam()}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      name: projectName,
+      gitSource: {
+        type: "github",
+        repo: gitRepoFullName,
+        ref,
+      },
+      target: "production",
+      projectSettings: {
+        framework: "nextjs",
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Failed to trigger deployment: ${res.status} ${err}`);
+  }
+
+  const data = await res.json();
+  return {
+    deploymentId: data.id as string,
+    url: data.url as string,
+  };
+}
+
 export async function getDeploymentStatus(
   deploymentId: string
 ): Promise<string> {
