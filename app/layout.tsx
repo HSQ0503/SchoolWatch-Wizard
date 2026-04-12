@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Fraunces, Archivo_Black, JetBrains_Mono, Caveat } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces, Archivo_Black, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
+
+const geistSans = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+});
 
 const archivoBlack = Archivo_Black({
   subsets: ["latin"],
@@ -47,7 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body
-        className={`${archivoBlack.variable} ${jetbrainsMono.variable} ${caveat.variable} ${fraunces.variable} ${geistMono.variable} font-sans min-h-full`}
+        className={`${geistSans.variable} ${archivoBlack.variable} ${jetbrainsMono.variable} ${caveat.variable} ${fraunces.variable} ${geistMono.variable} font-sans min-h-full`}
       >
         {children}
       </body>
