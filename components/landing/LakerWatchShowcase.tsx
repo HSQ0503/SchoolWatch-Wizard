@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Reveal from "./Reveal";
 
 type Callout = {
@@ -56,8 +57,14 @@ export default function LakerWatchShowcase() {
                 lakerwatch.com
               </span>
             </div>
-            <div className="flex h-[calc(100%-2.25rem)] items-center justify-center text-xs text-white/20">
-              LakerWatch dashboard (placeholder)
+            <div className="relative h-[calc(100%-2.25rem)] w-full overflow-hidden">
+              <Image
+                src="/screenshots/lakerwatch-dashboard.png"
+                alt="LakerWatch dashboard at Windermere Prep, showing a live countdown ring, the current period, and the school calendar."
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 1024px) 100vw, 768px"
+              />
             </div>
           </div>
 
@@ -85,8 +92,14 @@ export default function LakerWatchShowcase() {
               <span className="h-2 w-2 rounded-full bg-white/10" />
               <span className="h-2 w-2 rounded-full bg-white/10" />
             </div>
-            <div className="flex h-[calc(100%-1.75rem)] items-center justify-center text-xs text-white/20">
-              LakerWatch dashboard (placeholder)
+            <div className="relative h-[calc(100%-1.75rem)] w-full overflow-hidden">
+              <Image
+                src="/screenshots/lakerwatch-dashboard.png"
+                alt="LakerWatch dashboard at Windermere Prep, showing a live countdown ring, the current period, and the school calendar."
+                fill
+                className="object-cover object-top"
+                sizes="100vw"
+              />
             </div>
           </div>
           <ul className="mt-8 space-y-5">

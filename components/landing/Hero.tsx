@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Hero() {
   return (
@@ -71,9 +72,15 @@ export default function Hero() {
                 lakerwatch.com
               </span>
             </div>
-            {/* Placeholder content — replaced with real screenshot in Task 12 */}
-            <div className="flex h-[calc(100%-2.25rem)] items-center justify-center text-xs text-white/20">
-              LakerWatch screenshot (placeholder)
+            <div className="relative h-[calc(100%-2.25rem)] w-full overflow-hidden">
+              <Image
+                src="/screenshots/lakerwatch-dashboard.png"
+                alt="LakerWatch dashboard at Windermere Prep, showing a live countdown ring, the current period, and the school calendar."
+                fill
+                className="object-cover object-top"
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
             </div>
           </div>
         </div>

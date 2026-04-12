@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Reveal from "./Reveal";
 
 type Step = {
   n: string;
+  src: string;
   title: string;
   body: string;
 };
@@ -9,21 +11,25 @@ type Step = {
 const STEPS: Step[] = [
   {
     n: "01",
+    src: "/screenshots/wizard/01-school.png",
     title: "Name your school.",
     body: "Mascot, colors, academic year. The basics.",
   },
   {
     n: "02",
+    src: "/screenshots/wizard/02-colors.png",
     title: "Pick your palette.",
     body: "Two seed colors, eight zones, dark mode included.",
   },
   {
     n: "03",
+    src: "/screenshots/wizard/03-schedule.png",
     title: "Add your schedule.",
     body: "Simple, block, or rotating. Lunch waves handled.",
   },
   {
     n: "04",
+    src: "/screenshots/wizard/04-deploy.png",
     title: "Deploy.",
     body: "We send you a live URL. Share it with your friends.",
   },
@@ -50,11 +56,15 @@ export default function WizardPreview() {
               <p className="font-mono text-sm font-semibold text-[color:var(--color-accent)]">
                 {s.n}
               </p>
-              {/* Placeholder thumbnail — replaced with real screenshot in Task 12 */}
-              <div
-                aria-hidden="true"
-                className="mt-4 aspect-[4/3] w-full rounded-md border border-[color:var(--color-border-hairline)] bg-black/40"
-              />
+              <div className="relative mt-4 aspect-[4/3] w-full overflow-hidden rounded-md border border-[color:var(--color-border-hairline)] bg-black/40">
+                <Image
+                  src={s.src}
+                  alt={`SchoolWatch wizard step ${s.n}: ${s.title}`}
+                  fill
+                  className="object-cover object-top"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                />
+              </div>
               <p className="mt-5 text-base font-semibold text-white">
                 {s.title}
               </p>
