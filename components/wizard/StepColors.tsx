@@ -138,8 +138,12 @@ export default function StepColors({ data, onChange }: StepProps) {
     if (!zoneClickable) return {};
     const mode: "light" | "dark" = showingDark ? "dark" : "light";
     return {
-      onClick: () => setActiveZone({ zone, mode }),
+      onClick: (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        setActiveZone({ zone, mode });
+      },
       onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
         e.currentTarget.style.outline = "2px dashed rgba(255,255,255,0.4)";
         e.currentTarget.style.outlineOffset = "2px";
         e.currentTarget.style.cursor = "pointer";
