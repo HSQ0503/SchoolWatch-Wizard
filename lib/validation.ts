@@ -49,9 +49,28 @@ function validateColors(data: WizardFormData): string[] {
   return errors;
 }
 
+function validatePeriodList(
+  periods: { name: string; start: string; end: string }[],
+  dayTypeLabel: string,
+  sectionLabel: string,
+  errors: string[],
+) {
+  for (let i = 0; i < periods.length; i++) {
+    const p = periods[i];
+    const label = p.name || `${sectionLabel} ${i + 1}`;
+    if (!p.name.trim()) errors.push(`${dayTypeLabel}: ${sectionLabel} ${i + 1} needs a name`);
+    if (!TIME_RE.test(p.start)) errors.push(`${dayTypeLabel}: "${label}" has an invalid start time`);
+    if (!TIME_RE.test(p.end)) errors.push(`${dayTypeLabel}: "${label}" has an invalid end time`);
+    if (TIME_RE.test(p.start) && TIME_RE.test(p.end) && p.start >= p.end) {
+      errors.push(`${dayTypeLabel}: "${label}" end time must be after start time`);
+    }
+  }
+}
+
 function validateSchedule(data: WizardFormData): string[] {
   const errors: string[] = [];
   const { dayTypes, bells } = data.schedule;
+  const lunchWavesEnabled = data.lunchWaves.enabled && data.lunchWaves.options.length > 0;
 
   if (dayTypes.length === 0) {
     errors.push("At least one day type is required");
@@ -68,30 +87,37 @@ function validateSchedule(data: WizardFormData): string[] {
       continue;
     }
 
-    const periods = block.shared;
-    if (periods.length === 0) {
-      errors.push(`"${dt.label || dt.id}" needs at least one period`);
+    const dtLabel = dt.label || dt.id;
+
+    // Count total periods across all sections — a day type needs at least one somewhere
+    const sharedCount = block.shared.length;
+    const afterCount = block.after?.length ?? 0;
+    const waveCount = lunchWavesEnabled
+      ? data.lunchWaves.options.reduce(
+          (sum, w) => sum + (block.lunchWaves?.[w.id]?.length ?? 0),
+          0,
+        )
+      : 0;
+
+    if (sharedCount + afterCount + waveCount === 0) {
+      errors.push(`"${dtLabel}" needs at least one period`);
       continue;
     }
 
-    for (let i = 0; i < periods.length; i++) {
-      const p = periods[i];
-      const label = p.name || `Period ${i + 1}`;
-      if (!p.name.trim()) errors.push(`${dt.label}: period ${i + 1} needs a name`);
-      if (!TIME_RE.test(p.start)) errors.push(`${dt.label}: "${label}" has an invalid start time`);
-      if (!TIME_RE.test(p.end)) errors.push(`${dt.label}: "${label}" has an invalid end time`);
-      if (TIME_RE.test(p.start) && TIME_RE.test(p.end) && p.start >= p.end) {
-        errors.push(`${dt.label}: "${label}" end time must be after start time`);
-      }
-    }
+    // Validate all period sections
+    validatePeriodList(block.shared, dtLabel, "period", errors);
+    validatePeriodList(block.after ?? [], dtLabel, "after-lunch period", errors);
 
-    // Validate after periods if they exist
-    for (let i = 0; i < (block.after?.length ?? 0); i++) {
-      const p = block.after[i];
-      const label = p.name || `After-period ${i + 1}`;
-      if (!p.name.trim()) errors.push(`${dt.label}: after-period ${i + 1} needs a name`);
-      if (!TIME_RE.test(p.start)) errors.push(`${dt.label}: "${label}" has an invalid start time`);
-      if (!TIME_RE.test(p.end)) errors.push(`${dt.label}: "${label}" has an invalid end time`);
+    if (lunchWavesEnabled) {
+      for (const wave of data.lunchWaves.options) {
+        const wavePeriods = block.lunchWaves?.[wave.id] ?? [];
+        validatePeriodList(
+          wavePeriods,
+          dtLabel,
+          `${wave.label || wave.id} lunch period`,
+          errors,
+        );
+      }
     }
   }
 

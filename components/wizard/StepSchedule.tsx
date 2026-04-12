@@ -25,11 +25,11 @@ function genId() {
   return `dt-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-// Smart default: auto-increment period name and time
-function nextPeriodDefaults(periods: Period[]): Period {
+// Smart default: auto-increment period name and time based on the last period's end
+function nextPeriodDefaults(periods: Period[], fallbackStart = "08:00"): Period {
   const count = periods.length;
   const name = `${count + 1}${count === 0 ? "st" : count === 1 ? "nd" : count === 2 ? "rd" : "th"} Period`;
-  if (count === 0) return { name, start: "08:00", end: "08:50" };
+  if (count === 0) return { name, start: fallbackStart, end: "" };
   const lastEnd = periods[count - 1].end;
   if (/^\d{2}:\d{2}$/.test(lastEnd)) {
     const [h, m] = lastEnd.split(":").map(Number);
@@ -53,11 +53,87 @@ function TrashIcon() {
   );
 }
 
+type PeriodListProps = {
+  periods: Period[];
+  label: string;
+  description?: string;
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  onUpdate: (index: number, patch: Partial<Period>) => void;
+  addLabel?: string;
+  emptyMessage?: string;
+};
+
+function PeriodList({
+  periods,
+  label,
+  description,
+  onAdd,
+  onRemove,
+  onUpdate,
+  addLabel = "+ Add Period",
+  emptyMessage = "No periods yet. Click below to add one.",
+}: PeriodListProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
+      {description && (
+        <p className="text-xs text-gray-500 mb-2">{description}</p>
+      )}
+      <div className="space-y-2">
+        {periods.length === 0 && (
+          <p className="text-sm text-gray-500 italic">{emptyMessage}</p>
+        )}
+        {periods.map((period, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <input
+              className={inputClass}
+              type="text"
+              placeholder="Period name"
+              value={period.name}
+              onChange={(e) => onUpdate(i, { name: e.target.value })}
+            />
+            <input
+              className={timeInputClass}
+              type="time"
+              value={period.start}
+              onChange={(e) => onUpdate(i, { start: e.target.value })}
+              aria-label="Start time"
+            />
+            <input
+              className={timeInputClass}
+              type="time"
+              value={period.end}
+              onChange={(e) => onUpdate(i, { end: e.target.value })}
+              aria-label="End time"
+            />
+            <button
+              onClick={() => onRemove(i)}
+              aria-label={`Remove period ${i + 1}`}
+              className="cursor-pointer shrink-0 rounded-lg p-2 text-gray-600 transition-colors duration-150 hover:bg-white/5 hover:text-red-400"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={onAdd}
+        className="mt-3 cursor-pointer rounded-lg border border-dashed border-white/20 px-4 py-2 text-sm text-gray-500 transition-colors duration-150 hover:border-white/30 hover:text-gray-300"
+      >
+        {addLabel}
+      </button>
+    </div>
+  );
+}
+
 export default function StepSchedule({ data, onChange }: StepProps) {
   const [activeDayTypeIndex, setActiveDayTypeIndex] = useState(0);
 
   const { dayTypes, bells } = data.schedule;
   const activeDayType = dayTypes[activeDayTypeIndex] ?? dayTypes[0];
+  const lunchWavesEnabled = data.lunchWaves.enabled && data.lunchWaves.options.length > 0;
+  const waveOptions = data.lunchWaves.options;
 
   function updateSchedule(patch: Partial<WizardFormData["schedule"]>) {
     onChange({ ...data, schedule: { ...data.schedule, ...patch } });
@@ -98,37 +174,68 @@ export default function StepSchedule({ data, onChange }: StepProps) {
     updateSchedule({ dayTypes: newDayTypes });
   }
 
-  function getPeriods(): Period[] {
-    return bells[activeDayType?.id]?.shared ?? [];
-  }
+  // Current bells block for the active day type
+  const activeBlock = bells[activeDayType?.id] ?? { shared: [], after: [] };
+  const sharedPeriods = activeBlock.shared;
+  const afterPeriods = activeBlock.after ?? [];
+  const waveBells = activeBlock.lunchWaves ?? {};
 
-  function setPeriods(periods: Period[]) {
+  function updateBlock(patch: Partial<typeof activeBlock>) {
     const id = activeDayType.id;
     const existing = bells[id] ?? { shared: [], after: [] };
-    updateSchedule({ bells: { ...bells, [id]: { ...existing, shared: periods } } });
+    updateSchedule({ bells: { ...bells, [id]: { ...existing, ...patch } } });
   }
 
-  function addPeriod() {
-    const periods = getPeriods();
-    setPeriods([...periods, nextPeriodDefaults(periods)]);
+  // Shared period handlers
+  function addSharedPeriod() {
+    updateBlock({ shared: [...sharedPeriods, nextPeriodDefaults(sharedPeriods)] });
+  }
+  function removeSharedPeriod(i: number) {
+    updateBlock({ shared: sharedPeriods.filter((_, idx) => idx !== i) });
+  }
+  function updateSharedPeriod(i: number, patch: Partial<Period>) {
+    updateBlock({ shared: sharedPeriods.map((p, idx) => (idx === i ? { ...p, ...patch } : p)) });
   }
 
-  function removePeriod(index: number) {
-    setPeriods(getPeriods().filter((_, i) => i !== index));
+  // After period handlers
+  function addAfterPeriod() {
+    const fallback = lastEnd(sharedPeriods) ?? "12:00";
+    updateBlock({ after: [...afterPeriods, nextPeriodDefaults(afterPeriods, fallback)] });
+  }
+  function removeAfterPeriod(i: number) {
+    updateBlock({ after: afterPeriods.filter((_, idx) => idx !== i) });
+  }
+  function updateAfterPeriod(i: number, patch: Partial<Period>) {
+    updateBlock({ after: afterPeriods.map((p, idx) => (idx === i ? { ...p, ...patch } : p)) });
   }
 
-  function updatePeriod(index: number, patch: Partial<Period>) {
-    setPeriods(getPeriods().map((p, i) => (i === index ? { ...p, ...patch } : p)));
+  // Per-wave period handlers
+  function getWavePeriods(waveId: string): Period[] {
+    return waveBells[waveId] ?? [];
   }
-
-  const periods = getPeriods();
+  function setWavePeriods(waveId: string, periods: Period[]) {
+    updateBlock({ lunchWaves: { ...waveBells, [waveId]: periods } });
+  }
+  function addWavePeriod(waveId: string) {
+    const existing = getWavePeriods(waveId);
+    const fallback = lastEnd(sharedPeriods) ?? "11:00";
+    setWavePeriods(waveId, [...existing, nextPeriodDefaults(existing, fallback)]);
+  }
+  function removeWavePeriod(waveId: string, i: number) {
+    setWavePeriods(waveId, getWavePeriods(waveId).filter((_, idx) => idx !== i));
+  }
+  function updateWavePeriod(waveId: string, i: number, patch: Partial<Period>) {
+    setWavePeriods(waveId, getWavePeriods(waveId).map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-white">Bell Schedule</h2>
         <p className="mt-1 text-sm text-gray-400">
-          Define day types (e.g. Regular, Early Release) and their periods.
+          {lunchWavesEnabled
+            ? "Define periods before lunch, per-wave lunch periods, and periods after lunch."
+            : "Define day types (e.g. Regular, Early Release) and their periods."}
         </p>
       </div>
 
@@ -193,53 +300,55 @@ export default function StepSchedule({ data, onChange }: StepProps) {
             </div>
           </div>
 
-          {/* Periods */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Periods</label>
-            <div className="space-y-2">
-              {periods.length === 0 && (
-                <p className="text-sm text-gray-500 italic">No periods yet. Click below to add one.</p>
-              )}
-              {periods.map((period, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input
-                    className={inputClass}
-                    type="text"
-                    placeholder="Period name"
-                    value={period.name}
-                    onChange={(e) => updatePeriod(i, { name: e.target.value })}
+          {/* Periods — layout depends on lunch waves */}
+          {!lunchWavesEnabled ? (
+            <PeriodList
+              periods={sharedPeriods}
+              label="Periods"
+              onAdd={addSharedPeriod}
+              onRemove={removeSharedPeriod}
+              onUpdate={updateSharedPeriod}
+            />
+          ) : (
+            <div className="space-y-5">
+              <PeriodList
+                periods={sharedPeriods}
+                label="Before Lunch"
+                description="Periods everyone has at the same time, before lunch starts."
+                onAdd={addSharedPeriod}
+                onRemove={removeSharedPeriod}
+                onUpdate={updateSharedPeriod}
+                emptyMessage="No before-lunch periods yet."
+              />
+
+              {waveOptions.map((wave) => (
+                <div
+                  key={wave.id}
+                  className="rounded-lg border border-white/10 bg-white/5 p-4"
+                >
+                  <PeriodList
+                    periods={getWavePeriods(wave.id)}
+                    label={`Lunch Wave: ${wave.label || wave.id}`}
+                    description="Periods for students in this wave during the lunch split (usually lunch + an adjacent class)."
+                    onAdd={() => addWavePeriod(wave.id)}
+                    onRemove={(i) => removeWavePeriod(wave.id, i)}
+                    onUpdate={(i, patch) => updateWavePeriod(wave.id, i, patch)}
+                    emptyMessage="No periods for this wave yet."
                   />
-                  <input
-                    className={timeInputClass}
-                    type="time"
-                    value={period.start}
-                    onChange={(e) => updatePeriod(i, { start: e.target.value })}
-                    aria-label="Start time"
-                  />
-                  <input
-                    className={timeInputClass}
-                    type="time"
-                    value={period.end}
-                    onChange={(e) => updatePeriod(i, { end: e.target.value })}
-                    aria-label="End time"
-                  />
-                  <button
-                    onClick={() => removePeriod(i)}
-                    aria-label={`Remove period ${i + 1}`}
-                    className="cursor-pointer shrink-0 rounded-lg p-2 text-gray-600 transition-colors duration-150 hover:bg-white/5 hover:text-red-400"
-                  >
-                    <TrashIcon />
-                  </button>
                 </div>
               ))}
+
+              <PeriodList
+                periods={afterPeriods}
+                label="After Lunch"
+                description="Periods everyone has at the same time, after lunch ends."
+                onAdd={addAfterPeriod}
+                onRemove={removeAfterPeriod}
+                onUpdate={updateAfterPeriod}
+                emptyMessage="No after-lunch periods yet."
+              />
             </div>
-            <button
-              onClick={addPeriod}
-              className="mt-3 cursor-pointer rounded-lg border border-dashed border-white/20 px-4 py-2 text-sm text-gray-500 transition-colors duration-150 hover:border-white/30 hover:text-gray-300"
-            >
-              + Add Period
-            </button>
-          </div>
+          )}
 
           {/* Remove day type */}
           {dayTypes.length > 1 && (
@@ -256,4 +365,10 @@ export default function StepSchedule({ data, onChange }: StepProps) {
       )}
     </div>
   );
+}
+
+function lastEnd(periods: Period[]): string | null {
+  if (periods.length === 0) return null;
+  const end = periods[periods.length - 1].end;
+  return /^\d{2}:\d{2}$/.test(end) ? end : null;
 }
