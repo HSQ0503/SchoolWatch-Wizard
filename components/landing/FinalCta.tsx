@@ -1,8 +1,10 @@
 import Link from "next/link";
+import Reveal from "./Reveal";
 
 export default function FinalCta() {
   return (
     <section className="relative flex min-h-[65vh] items-center justify-center px-6 py-32">
+      <Reveal>
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-bold leading-[1.05] tracking-[-0.03em] text-white md:text-6xl">
           You&apos;re still reading.
@@ -21,6 +23,7 @@ export default function FinalCta() {
           Takes about 5 minutes. No signup before you start.
         </p>
       </div>
+      </Reveal>
     </section>
   );
 }

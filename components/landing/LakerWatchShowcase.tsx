@@ -1,3 +1,5 @@
+import Reveal from "./Reveal";
+
 type Callout = {
   position: string;
   title: string;
@@ -30,6 +32,7 @@ const CALLOUTS: Callout[] = [
 export default function LakerWatchShowcase() {
   return (
     <section className="relative px-6 py-28">
+      <Reveal>
       <div className="mx-auto max-w-5xl">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--color-label)]">
           Live at Windermere Prep
@@ -108,6 +111,7 @@ export default function LakerWatchShowcase() {
           </a>
         </div>
       </div>
+      </Reveal>
     </section>
   );
 }
