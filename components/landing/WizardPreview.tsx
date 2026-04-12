@@ -31,7 +31,7 @@ const STEPS: Step[] = [
 
 export default function WizardPreview() {
   return (
-    <section className="relative px-6 py-28">
+    <section aria-label="How it works" className="relative px-6 py-28">
       <Reveal>
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--color-label)]">

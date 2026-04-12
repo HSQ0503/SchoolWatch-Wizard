@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden px-6 pb-24 pt-20 sm:pt-28">
+    <section aria-label="Hero" className="relative overflow-hidden px-6 pb-24 pt-20 sm:pt-28">
       {/* Radial glow behind headline. rgba(255,99,99,…) matches --color-accent. */}
       <div
         aria-hidden="true"

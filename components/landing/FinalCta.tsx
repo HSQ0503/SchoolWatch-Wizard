@@ -3,7 +3,7 @@ import Reveal from "./Reveal";
 
 export default function FinalCta() {
   return (
-    <section className="relative flex min-h-[65vh] items-center justify-center px-6 py-32">
+    <section aria-label="Get started" className="relative flex min-h-[65vh] items-center justify-center px-6 py-40">
       <Reveal>
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-bold leading-[1.05] tracking-[-0.03em] text-white md:text-6xl">

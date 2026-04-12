@@ -5,10 +5,9 @@ import type { ReactNode } from "react";
 
 type RevealProps = {
   children: ReactNode;
-  delay?: number;
 };
 
-export default function Reveal({ children, delay = 0 }: RevealProps) {
+export default function Reveal({ children }: RevealProps) {
   const shouldReduce = useReducedMotion();
 
   return (
@@ -17,7 +16,7 @@ export default function Reveal({ children, delay = 0 }: RevealProps) {
       initial={shouldReduce ? false : { opacity: 0, y: 24 }}
       whileInView={shouldReduce ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10% 0px" }}
-      transition={{ duration: 0.6, ease: "easeOut", delay }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
       {children}
     </motion.div>

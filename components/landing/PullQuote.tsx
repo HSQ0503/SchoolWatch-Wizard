@@ -2,7 +2,7 @@ import Reveal from "./Reveal";
 
 export default function PullQuote() {
   return (
-    <section className="relative px-6 py-40">
+    <section aria-label="Identity quote" className="relative px-6 py-40">
       <Reveal>
         <div className="mx-auto max-w-3xl text-center">
         <span aria-hidden="true" className="mx-auto block h-px w-16 bg-[color:var(--color-accent)]" />

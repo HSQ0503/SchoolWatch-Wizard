@@ -30,7 +30,7 @@ const ITEMS: FaqItem[] = [
 
 export default function Faq() {
   return (
-    <section className="relative px-6 py-28">
+    <section aria-label="Frequently asked questions" className="relative px-6 py-28">
       <Reveal>
       <div className="mx-auto max-w-3xl">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--color-label)]">
