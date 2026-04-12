@@ -3,16 +3,16 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden px-6 pb-24 pt-20 sm:pt-28">
-      {/* Radial glow behind headline */}
+      {/* Radial glow behind headline. rgba(255,99,99,…) matches --color-accent. */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-24 -z-10 h-[520px] w-[820px] -translate-x-1/2 rounded-full blur-3xl"
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-24 h-[520px] w-[820px] -translate-x-1/2 rounded-full blur-3xl"
         style={{ background: "radial-gradient(closest-side, rgba(255,99,99,0.18), transparent 70%)" }}
       />
 
       <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-[1.1fr_1fr] md:gap-16">
         {/* Left: copy + CTAs */}
-        <div>
+        <div className="relative">
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--color-label)]">
             SchoolWatch
           </p>
@@ -59,8 +59,11 @@ export default function Hero() {
             className="relative aspect-[4/3] w-full rotate-[2deg] rounded-xl border border-[color:var(--color-border-hairline)] bg-[color:var(--color-surface)] shadow-2xl"
             style={{ boxShadow: "0 40px 120px -20px rgba(255,99,99,0.15)" }}
           >
-            {/* Window chrome */}
-            <div className="flex items-center gap-1.5 border-b border-[color:var(--color-border-hairline)] px-3 py-2.5">
+            {/* Window chrome — decorative */}
+            <div
+              aria-hidden="true"
+              className="flex items-center gap-1.5 border-b border-[color:var(--color-border-hairline)] px-3 py-2.5"
+            >
               <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
               <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
               <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
