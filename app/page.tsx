@@ -1,11 +1,11 @@
-import LandingHero from "@/components/LandingHero";
-import LandingFeatures from "@/components/LandingFeatures";
+import Hero from "@/components/landing/Hero";
+import Noise from "@/components/landing/Noise";
 
 export default function Home() {
   return (
-    <main>
-      <LandingHero />
-      <LandingFeatures />
+    <main className="relative">
+      <Noise />
+      <Hero />
     </main>
   );
 }
