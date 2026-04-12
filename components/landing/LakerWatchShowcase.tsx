@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Arrow from "./Arrow";
 import Reveal from "./Reveal";
+import SectionDivider from "./SectionDivider";
 
 type Callout = {
   position: string;
@@ -32,14 +34,24 @@ const CALLOUTS: Callout[] = [
 
 export default function LakerWatchShowcase() {
   return (
-    <section aria-label="LakerWatch showcase" className="relative px-6 py-28">
-      <Reveal>
+    <section
+      aria-label="LakerWatch showcase"
+      className="relative px-6 py-28"
+      style={{
+        background:
+          "linear-gradient(180deg, #0a0a0a 0%, #0b0b0e 50%, #0a0a0a 100%)",
+      }}
+    >
+      <SectionDivider />
       {/* Narrower than other sections so overhanging callout cards at lg+ have room to breathe. */}
       <div className="mx-auto max-w-5xl">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--color-label)]">
           Live at Windermere Prep
         </p>
-        <h2 className="mt-4 max-w-[20ch] text-4xl font-bold leading-[1.05] tracking-[-0.03em] text-white md:text-5xl">
+        <h2
+          className="mt-4 max-w-[20ch] text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-white md:text-5xl font-[family-name:var(--font-display)]"
+          style={{ fontVariationSettings: '"opsz" 72' }}
+        >
           A real student-built dashboard. Running right now.
         </h2>
 
@@ -68,15 +80,19 @@ export default function LakerWatchShowcase() {
             </div>
           </div>
 
-          {CALLOUTS.map((c) => (
+          {CALLOUTS.map((c, i) => (
             <div
               key={c.title}
-              className={`absolute ${c.position} w-44 rounded-lg border border-[color:var(--color-border-hairline)] bg-black/80 p-3 backdrop-blur`}
+              className={`absolute ${c.position} w-44`}
             >
-              <p className="text-[13px] font-semibold text-white">{c.title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-[color:var(--color-body)]">
-                {c.body}
-              </p>
+              <Reveal delay={i * 0.12}>
+                <div className="rounded-lg border border-[color:var(--color-border-hairline)] bg-black/80 p-3 backdrop-blur">
+                  <p className="text-[13px] font-semibold text-white">{c.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[color:var(--color-body)]">
+                    {c.body}
+                  </p>
+                </div>
+              </Reveal>
             </div>
           ))}
         </div>
@@ -103,12 +119,16 @@ export default function LakerWatchShowcase() {
             </div>
           </div>
           <ul className="mt-8 space-y-5">
-            {CALLOUTS.map((c) => (
+            {CALLOUTS.map((c, i) => (
               <li key={c.title}>
-                <p className="text-sm font-semibold text-white">{c.title}</p>
-                <p className="mt-1 text-sm text-[color:var(--color-body)]">
-                  {c.body}
-                </p>
+                <Reveal delay={i * 0.1}>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{c.title}</p>
+                    <p className="mt-1 text-sm text-[color:var(--color-body)]">
+                      {c.body}
+                    </p>
+                  </div>
+                </Reveal>
               </li>
             ))}
           </ul>
@@ -119,13 +139,12 @@ export default function LakerWatchShowcase() {
             href="https://lakerwatch.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs uppercase tracking-wider text-[color:var(--color-label)] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
+            className="group inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-[color:var(--color-label)] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
           >
-            lakerwatch.com →
+            lakerwatch.com <Arrow />
           </a>
         </div>
       </div>
-      </Reveal>
     </section>
   );
 }
