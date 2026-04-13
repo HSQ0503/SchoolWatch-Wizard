@@ -31,6 +31,14 @@
   color: var(--ink);
 }
 
+/* Hide native scrollbar on pages using the zine theme — a custom progress bar replaces it. */
+html:has(.theme-zine) {
+  scrollbar-width: none;
+}
+html:has(.theme-zine)::-webkit-scrollbar {
+  display: none;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

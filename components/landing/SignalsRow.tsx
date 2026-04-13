@@ -1,14 +1,83 @@
+"use client";
+
 // Source: homepage-zine.html — .signals
-const SIGNALS: { n: string; label: string }[] = [
-  { n: "5", label: "min to live" },
-  { n: "0", label: "lines of code" },
-  { n: "247", label: "schools running" },
-  { n: "$0", label: "forever" },
+import { useEffect, useRef, useState } from "react";
+
+type Signal = {
+  from: number;
+  to: number;
+  label: string;
+  prefix?: string;
+  suffix?: string;
+  comma?: boolean;
+};
+
+const SIGNALS: Signal[] = [
+  { from: 0, to: 5, label: "min to live" },
+  { from: 47832, to: 0, label: "lines of code", comma: true },
+  { from: 0, to: 100, label: "yours", suffix: "%" },
+  { from: 299, to: 0, label: "forever", prefix: "$" },
 ];
 
+const DURATION = 1400;
+
+function formatSignal(value: number, s: Signal) {
+  const rounded = Math.round(value);
+  const body = s.comma ? rounded.toLocaleString("en-US") : String(rounded);
+  return `${s.prefix ?? ""}${body}${s.suffix ?? ""}`;
+}
+
 export default function SignalsRow() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [values, setValues] = useState<number[]>(() => SIGNALS.map((s) => s.from));
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setValues(SIGNALS.map((s) => s.to));
+      return;
+    }
+
+    let rafId = 0;
+    let started = false;
+
+    const run = () => {
+      const start = performance.now();
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / DURATION);
+        const eased = 1 - Math.pow(1 - t, 3);
+        setValues(SIGNALS.map((s) => s.from + (s.to - s.from) * eased));
+        if (t < 1) rafId = requestAnimationFrame(tick);
+      };
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && !started) {
+            started = true;
+            run();
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       aria-label="Key facts"
       className="border-y-2 border-[color:var(--color-ink)] px-8 py-5"
     >
@@ -16,14 +85,14 @@ export default function SignalsRow() {
         {SIGNALS.map((s, i) => (
           <li key={s.label} className="flex items-baseline gap-3 whitespace-nowrap">
             <span
-              className="text-[color:var(--color-marker)]"
+              className="tabular-nums text-[color:var(--color-marker)]"
               style={{
                 fontFamily: "var(--font-archivo)",
                 fontSize: 34,
                 letterSpacing: "-0.03em",
               }}
             >
-              {s.n}
+              {formatSignal(values[i] ?? s.from, s)}
             </span>
             <span
               className="text-[color:var(--color-ink)]"

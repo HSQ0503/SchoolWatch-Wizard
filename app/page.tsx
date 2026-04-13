@@ -4,6 +4,7 @@ import Footer from "@/components/landing/Footer";
 import HowItWorks from "@/components/landing/HowItWorks";
 import PaperNoise from "@/components/landing/PaperNoise";
 import PullQuote from "@/components/landing/PullQuote";
+import ScrollProgress from "@/components/landing/ScrollProgress";
 import Showcase from "@/components/landing/Showcase";
 import SignalsRow from "@/components/landing/SignalsRow";
 import ZineHero from "@/components/landing/ZineHero";
@@ -13,6 +14,7 @@ export default function Home() {
   return (
     <main className="theme-zine relative">
       <PaperNoise />
+      <ScrollProgress />
       <ZineNav />
       <ZineHero />
       <SignalsRow />

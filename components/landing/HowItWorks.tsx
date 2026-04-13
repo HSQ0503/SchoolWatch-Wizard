@@ -18,7 +18,7 @@ const STEPS: Step[] = [
     title: "Name your school.",
     body: "Mascot, city, academic year. The basics. Optional: drag in a logo.",
     src: "/screenshots/wizard/01-school.png",
-    annotation: { label: "takes ~30s ↘", arrow: "none", rotate: -4, className: "absolute top-10 right-[40%]" },
+    annotation: { label: "takes ~30s ↘", arrow: "none", rotate: -4, className: "mt-5 ml-auto block w-max" },
     rotation: -1.5,
   },
   {
@@ -33,7 +33,7 @@ const STEPS: Step[] = [
     title: "Add your schedule.",
     body: "Regular days, block days, rotating days. Lunch waves handled. Friday half-day before finals? Yep.",
     src: "/screenshots/wizard/03-schedule.png",
-    annotation: { label: "← weird schedules welcome", arrow: "none", rotate: 3, className: "absolute top-20 right-[35%]" },
+    annotation: { label: "↖ weird schedules welcome", arrow: "none", rotate: 3, className: "mt-5 block w-max" },
     rotation: -1,
   },
   {

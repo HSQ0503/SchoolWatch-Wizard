@@ -68,10 +68,13 @@ export default function Showcase() {
               href="https://lakerwatch.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block border-b-2 border-dashed border-[color:var(--color-marker)] pb-0.5 text-[color:var(--color-marker)] no-underline"
+              className="group mt-6 inline-block border-b-2 border-dashed border-[color:var(--color-marker)] pb-0.5 text-[color:var(--color-marker)] no-underline transition-[border,transform,color] duration-200 ease-out hover:-translate-y-0.5 hover:border-solid hover:text-[color:var(--marker)]"
               style={{ fontFamily: "var(--font-caveat)", fontWeight: 700, fontSize: 22 }}
             >
-              see lakerwatch.com →
+              see lakerwatch.com
+              <span className="ml-1 inline-block transition-transform duration-200 ease-out group-hover:translate-x-1.5">
+                →
+              </span>
             </a>
           </div>
         </div>
