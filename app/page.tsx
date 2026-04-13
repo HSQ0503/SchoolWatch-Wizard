@@ -4,6 +4,7 @@ import Footer from "@/components/landing/Footer";
 import HowItWorks from "@/components/landing/HowItWorks";
 import PaperNoise from "@/components/landing/PaperNoise";
 import PullQuote from "@/components/landing/PullQuote";
+import Reveal from "@/components/landing/Reveal";
 import ScrollProgress from "@/components/landing/ScrollProgress";
 import Showcase from "@/components/landing/Showcase";
 import SignalsRow from "@/components/landing/SignalsRow";
@@ -18,11 +19,21 @@ export default function Home() {
       <ZineNav />
       <ZineHero />
       <SignalsRow />
-      <Showcase />
-      <HowItWorks />
-      <PullQuote />
-      <Faq />
-      <FinalCta />
+      <Reveal>
+        <Showcase />
+      </Reveal>
+      <Reveal>
+        <HowItWorks />
+      </Reveal>
+      <Reveal>
+        <PullQuote />
+      </Reveal>
+      <Reveal>
+        <Faq />
+      </Reveal>
+      <Reveal>
+        <FinalCta />
+      </Reveal>
       <Footer />
     </main>
   );

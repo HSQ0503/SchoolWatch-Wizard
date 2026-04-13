@@ -80,26 +80,27 @@ export default function SignalsRow() {
     <section
       ref={sectionRef}
       aria-label="Key facts"
-      className="border-y-2 border-[color:var(--color-ink)] px-8 py-5"
+      className="border-y-2 border-[color:var(--color-ink)] px-6 py-5 sm:px-8"
     >
-      <ul className="mx-auto flex max-w-[1120px] items-baseline justify-between gap-10 overflow-x-auto">
+      <ul className="mx-auto grid max-w-[1120px] grid-cols-2 gap-x-4 gap-y-4 sm:flex sm:items-baseline sm:justify-between sm:gap-10">
         {SIGNALS.map((s, i) => (
-          <li key={s.label} className="flex items-baseline gap-3 whitespace-nowrap">
+          <li
+            key={s.label}
+            className="flex items-baseline gap-2 whitespace-nowrap sm:gap-3"
+          >
             <span
-              className="tabular-nums text-[color:var(--color-marker)]"
+              className="tabular-nums text-[color:var(--color-marker)] text-[26px] sm:text-[34px]"
               style={{
                 fontFamily: "var(--font-archivo)",
-                fontSize: 34,
                 letterSpacing: "-0.03em",
               }}
             >
               {formatSignal(values[i] ?? s.from, s)}
             </span>
             <span
-              className="text-[color:var(--color-ink)]"
+              className="text-[color:var(--color-ink)] text-[11px] sm:text-[13px]"
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: 13,
                 textTransform: "uppercase",
                 letterSpacing: "0.12em",
               }}
@@ -109,7 +110,7 @@ export default function SignalsRow() {
             {i < SIGNALS.length - 1 && (
               <span
                 aria-hidden="true"
-                className="ml-7 mt-3 h-2.5 w-2.5 rotate-45 bg-[color:var(--color-ink)]"
+                className="hidden sm:ml-7 sm:mt-3 sm:block sm:h-2.5 sm:w-2.5 sm:rotate-45 sm:bg-[color:var(--color-ink)]"
               />
             )}
           </li>

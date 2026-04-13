@@ -98,13 +98,13 @@ export default function ZineHero() {
         {/* Photo collage — stacks below text on mobile, floats right inside hero on lg+ */}
         <motion.div
           variants={item}
-          className="relative mt-16 h-[660px] w-full sm:h-[660px] lg:mt-0 lg:absolute lg:right-[-80px] lg:top-4 lg:h-[420px] lg:w-[530px]"
+          className="relative mt-16 flex w-full flex-col items-center gap-8 lg:mt-0 lg:block lg:absolute lg:right-[-160px] lg:top-4 lg:h-[420px] lg:w-[530px]"
         >
           <Polaroid
             tape
             rotation={-5}
             caption="the live one at WPS"
-            className="absolute left-[4%] top-0 w-[260px] h-[195px] sm:w-[280px] sm:h-[205px] lg:left-0 lg:w-[240px] lg:h-[180px] z-[3]"
+            className="w-[240px] h-[180px] lg:absolute lg:left-0 lg:top-0 lg:w-[240px] lg:h-[180px] z-[3]"
           >
             <div className="flex h-full w-full flex-col p-3.5 text-white" style={{ background: "linear-gradient(135deg,#1a2a4a,#2a3a6a)" }}>
               <div className="text-[10px] uppercase tracking-[0.15em] opacity-70">Now</div>
@@ -114,7 +114,7 @@ export default function ZineHero() {
           </Polaroid>
           <Polaroid
             rotation={6}
-            className="absolute right-[4%] top-[245px] w-[220px] h-[170px] sm:w-[240px] sm:h-[180px] lg:left-0 lg:right-auto lg:top-[225px] lg:w-[230px] lg:h-[170px] z-[2]"
+            className="w-[230px] h-[170px] lg:absolute lg:left-0 lg:right-auto lg:top-[340px] lg:w-[230px] lg:h-[170px] z-[2]"
           >
             <div className="flex h-full w-full flex-col justify-end p-3.5 text-white" style={{ background: "#8b2635" }}>
               <div className="text-[24px] leading-none" style={{ fontFamily: "var(--font-archivo)" }}>IT&apos;S FRIDAY.</div>
@@ -123,7 +123,7 @@ export default function ZineHero() {
           </Polaroid>
           <Polaroid
             rotation={-2}
-            className="absolute left-[24%] top-[475px] w-[220px] h-[165px] sm:w-[235px] sm:h-[175px] lg:left-[280px] lg:top-[-40px] lg:w-[240px] lg:h-[180px] z-[4]"
+            className="w-[240px] h-[180px] lg:absolute lg:left-[280px] lg:top-[100px] lg:w-[240px] lg:h-[180px] z-[4]"
           >
             <div className="h-full w-full p-3.5 text-[color:var(--color-ink)]" style={{ background: "var(--paper)" }}>
               <div className="text-[10px] uppercase tracking-[0.15em] opacity-50">This week</div>
@@ -153,7 +153,7 @@ export default function ZineHero() {
           label="free & open source"
           arrow="down-left"
           rotate={4}
-          className="absolute right-[6%] top-5 lg:right-[460px] lg:top-2 z-20"
+          className="absolute right-2 top-5 lg:right-[460px] lg:top-2 z-20"
         />
       </motion.div>
       {/* Hidden ref for next Image so build picks it up even though we use bg */}

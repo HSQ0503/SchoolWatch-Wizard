@@ -11,7 +11,6 @@ export const STEPS = [
   "School Info",
   "Colors",
   "Schedule",
-  "Lunch Waves",
   "Calendar",
   "Features",
   "Review & Deploy",
