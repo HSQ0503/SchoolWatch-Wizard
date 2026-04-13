@@ -1,6 +1,16 @@
 "use client";
 
 import type { WizardFormData } from "@/lib/types";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
@@ -109,6 +119,7 @@ function DateCard({
 }
 
 export default function StepCalendar({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   const { noSchoolDates, earlyDismissalDates, events } = data.calendar;
 
   function updateCalendar(patch: Partial<WizardFormData["calendar"]>) {
@@ -148,13 +159,19 @@ export default function StepCalendar({ data, onChange }: StepProps) {
   return (
     <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
       <div>
-        <p className={kickerCls} style={kickerFont}>step 05 / calendar</p>
-        <h1 className={headlineCls} style={headlineFont}>
-          Pin the <span style={italicAccent}>important dates.</span>
-        </h1>
-        <p className={subcopyCls} style={subcopyFont}>
-          No-school days, early dismissals, and events. You can always add more after you deploy — the 10 biggest breaks of the year is a reasonable start.
-        </p>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 05 / calendar</motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Pin the <span style={italicAccent}>important dates.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+            No-school days, early dismissals, and events. You can always add more after you deploy — the 10 biggest breaks of the year is a reasonable start.
+          </motion.p>
+        </motion.div>
 
         {/* No-school days */}
         <section className="mt-10">

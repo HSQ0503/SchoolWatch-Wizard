@@ -2,6 +2,16 @@
 
 import React from "react";
 import type { WizardFormData } from "@/lib/types";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
@@ -55,6 +65,7 @@ const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 void labelFont;
 
 export default function StepFeatures({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   function toggle(key: keyof WizardFormData["features"]) {
     onChange({ ...data, features: { ...data.features, [key]: !data.features[key] } });
   }
@@ -62,14 +73,20 @@ export default function StepFeatures({ data, onChange }: StepProps) {
   return (
     <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
       <div>
-        <p className={kickerCls} style={kickerFont}>step 06 / features</p>
-        <h1 className={headlineCls} style={headlineFont}>
-          Pick the <span style={italicAccent}>extras.</span>
-        </h1>
-        <p className={subcopyCls} style={subcopyFont}>
-          Toggle optional dashboard sections on or off. Both can be changed later without
-          redeploying — flip them on to see how they look, off if they feel like clutter.
-        </p>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 06 / features</motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Pick the <span style={italicAccent}>extras.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+            Toggle optional dashboard sections on or off. Both can be changed later without
+            redeploying — flip them on to see how they look, off if they feel like clutter.
+          </motion.p>
+        </motion.div>
 
         <div className="mt-10 space-y-5">
           {FEATURES.map(({ key, title, description }) => {

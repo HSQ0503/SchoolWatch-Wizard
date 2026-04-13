@@ -2,6 +2,16 @@
 
 import React from "react";
 import type { WizardFormData } from "@/lib/types";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
@@ -40,6 +50,7 @@ const DEFAULT_WAVES: WaveOption[] = [
 ];
 
 export default function StepLunchWaves({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   const { enabled, options, default: defaultWave } = data.lunchWaves;
 
   function updateLunchWaves(patch: Partial<WizardFormData["lunchWaves"]>) {
@@ -73,13 +84,19 @@ export default function StepLunchWaves({ data, onChange }: StepProps) {
   return (
     <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
       <div>
-        <p className={kickerCls} style={kickerFont}>step 04 / lunch waves</p>
-        <h1 className={headlineCls} style={headlineFont}>
-          Split <span style={italicAccent}>lunch</span> by wave?
-        </h1>
-        <p className={subcopyCls} style={subcopyFont}>
-          Some schools run multiple lunch rotations to fit everyone. If yours does, turn this on and name each wave. If lunch is one shared period, leave it off and skip this step.
-        </p>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 04 / lunch waves</motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Split <span style={italicAccent}>lunch</span> by wave?
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+            Some schools run multiple lunch rotations to fit everyone. If yours does, turn this on and name each wave. If lunch is one shared period, leave it off and skip this step.
+          </motion.p>
+        </motion.div>
 
         {/* Enable toggle — InkCheckboxCard pattern */}
         <button

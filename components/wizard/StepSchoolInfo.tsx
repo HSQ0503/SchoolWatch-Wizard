@@ -3,6 +3,16 @@
 import { useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import type { WizardFormData } from "@/lib/types";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
@@ -37,6 +47,7 @@ const inputFont: React.CSSProperties = { fontFamily: "var(--font-display)" };
 const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 export default function StepSchoolInfo({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   const school = data.school;
   const nameRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -94,15 +105,21 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
   return (
     <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
       <div>
-        <p className={kickerCls} style={kickerFont}>
-          step 01 / school info
-        </p>
-        <h1 className={headlineCls} style={headlineFont}>
-          Tell us about the <span style={italicAccent}>school.</span>
-        </h1>
-        <p className={subcopyCls} style={subcopyFont}>
-          Name, mascot, location. This shows up in the tab title, headings, and the URL — you can edit it later.
-        </p>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>
+            step 01 / school info
+          </motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Tell us about the <span style={italicAccent}>school.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+            Name, mascot, location. This shows up in the tab title, headings, and the URL — you can edit it later.
+          </motion.p>
+        </motion.div>
 
         <div className="mt-10 space-y-6">
           <div>

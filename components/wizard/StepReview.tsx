@@ -5,6 +5,16 @@ import type { WizardFormData } from "@/lib/types";
 import DeployLog, { type DeployState } from "@/components/wizard/DeployLog";
 import ConfigPreview from "@/components/wizard/ConfigPreview";
 import { defaultLightColors } from "@/lib/colors";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void; schoolId?: string };
 
@@ -32,6 +42,7 @@ void italicAccent;
 void subcopyFont;
 
 export default function StepReview({ data, schoolId }: StepProps) {
+  const reduce = useReducedMotion();
   const isEditMode = !!schoolId;
   const [deployState, setDeployState] = useState<DeployState>("idle");
   const [deployUrl, setDeployUrl] = useState<string | undefined>();
@@ -95,16 +106,22 @@ export default function StepReview({ data, schoolId }: StepProps) {
   return (
     <div>
       {/* Header */}
-      <p className={kickerCls} style={kickerFont}>
-        step 07 / review &amp; deploy
-      </p>
-      <h1 className={headlineCls} style={headlineFont}>
-        <span style={italicAccent}>One more</span> look.
-      </h1>
-      <p className={subcopyCls} style={subcopyFont}>
-        If everything below looks right, hit {isEditMode ? "Redeploy" : "Deploy"}. We&rsquo;ll
-        create the repo, wire up Vercel, and email you a magic link in about a minute.
-      </p>
+      <motion.div
+        initial={reduce ? false : "hidden"}
+        animate="visible"
+        variants={headerContainer}
+      >
+        <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>
+          step 07 / review &amp; deploy
+        </motion.p>
+        <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+          <span style={italicAccent}>One more</span> look.
+        </motion.h1>
+        <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+          If everything below looks right, hit {isEditMode ? "Redeploy" : "Deploy"}. We&rsquo;ll
+          create the repo, wire up Vercel, and email you a magic link in about a minute.
+        </motion.p>
+      </motion.div>
 
       {/* ── School ─────────────────────────────────────────────────────────── */}
       <section className="mt-10">

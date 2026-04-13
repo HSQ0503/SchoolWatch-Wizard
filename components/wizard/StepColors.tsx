@@ -6,6 +6,16 @@ import type { ZoneColors } from "@/lib/colors";
 import type { WizardFormData } from "@/lib/types";
 import DashboardPreview from "./DashboardPreview";
 import TapedScreenshot from "@/components/landing/TapedScreenshot";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = {
   data: WizardFormData;
@@ -57,6 +67,7 @@ const ZONE_ORDER: (keyof ZoneColors)[] = [
 ];
 
 export default function StepColors({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   const { primary, accent } = data.colors;
 
   const [overriddenZones, setOverriddenZones] = useState<Set<string>>(
@@ -196,17 +207,23 @@ export default function StepColors({ data, onChange }: StepProps) {
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
       {/* Left column */}
       <div>
-        <p className={kickerCls} style={kickerFont}>
-          step 02 / colors
-        </p>
-        <h1 className={headlineCls} style={headlineFont}>
-          Pick the <span style={italicAccent}>palette.</span>
-        </h1>
-        <p className={subcopyCls} style={{ fontFamily: "var(--font-display)", maxWidth: "52ch" }}>
-          Pick two seed colors — primary (for most of the interface) and accent
-          (for small highlights). We&rsquo;ll fill in the rest, and you can
-          override any individual zone below.
-        </p>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>
+            step 02 / colors
+          </motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Pick the <span style={italicAccent}>palette.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={{ fontFamily: "var(--font-display)", maxWidth: "52ch" }}>
+            Pick two seed colors — primary (for most of the interface) and accent
+            (for small highlights). We&rsquo;ll fill in the rest, and you can
+            override any individual zone below.
+          </motion.p>
+        </motion.div>
 
         {/* Inline tip */}
         <p

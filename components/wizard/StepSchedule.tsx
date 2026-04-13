@@ -2,6 +2,16 @@
 
 import React, { useState } from "react";
 import type { WizardFormData } from "@/lib/types";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
@@ -191,6 +201,7 @@ function PeriodTable({
 }
 
 export default function StepSchedule({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   // Track active day type by index (all handlers below are index-based)
   const [activeDayTypeIndex, setActiveDayTypeIndex] = useState(0);
 
@@ -296,13 +307,19 @@ export default function StepSchedule({ data, onChange }: StepProps) {
     <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
       <div>
         {/* Header */}
-        <p className={kickerCls} style={kickerFont}>step 03 / schedule</p>
-        <h1 className={headlineCls} style={headlineFont}>
-          Build the <span style={italicAccent}>schedule.</span>
-        </h1>
-        <p className={subcopyCls} style={subcopyFont}>
-          Set up day types (regular, early dismissal, half day, etc.) and the bell periods for each. You can edit any of this later.
-        </p>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 03 / schedule</motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Build the <span style={italicAccent}>schedule.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+            Set up day types (regular, early dismissal, half day, etc.) and the bell periods for each. You can edit any of this later.
+          </motion.p>
+        </motion.div>
 
         {/* Day-type chip strip */}
         <div className="mt-10 flex flex-wrap items-center gap-2">
