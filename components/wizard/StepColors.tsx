@@ -338,7 +338,7 @@ export default function StepColors({ data, onChange }: StepProps) {
       </div>
 
       {/* Right column — live preview pinned */}
-      <div className="lg:sticky lg:top-[100px] lg:self-start">
+      <div className="lg:sticky lg:top-[100px] lg:self-start lg:z-10">
         <TapedScreenshot
           rotation={-1.5}
           tapes={[
