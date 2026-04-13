@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { WizardFormData } from "@/lib/types";
 import { generateConfigTs } from "@/lib/config-generator";
 
@@ -101,25 +101,31 @@ const CLASS_BY_TYPE: Record<Token["type"], string> = {
 };
 
 export default function ConfigPreview({ data, activeStep }: Props) {
-  const source = useMemo(() => generateConfigTs(data), [data]);
-  const lines = useMemo(() => source.split("\n"), [source]);
+  // React 19 Compiler handles memoization automatically — no useMemo needed here.
+  const source = generateConfigTs(data);
+  const lines = source.split("\n");
 
   // Compute the highlighted line range for the current step.
-  const range = useMemo(() => {
-    const anchor = STEP_ANCHORS[activeStep];
-    if (!anchor) return null;
+  const anchor = STEP_ANCHORS[activeStep];
+  let range: { start: number; end: number } | null = null;
+  if (anchor) {
     const start = lines.findIndex((l) => anchor.startPattern.test(l));
-    if (start < 0) return null;
-    const needed = anchor.endAfterBlocks ?? 1;
-    let seen = 0;
-    for (let i = start + 1; i < lines.length; i++) {
-      if (anchor.endPattern.test(lines[i])) {
-        seen++;
-        if (seen >= needed) return { start, end: i };
+    if (start >= 0) {
+      const needed = anchor.endAfterBlocks ?? 1;
+      let seen = 0;
+      let end = lines.length - 1;
+      for (let i = start + 1; i < lines.length; i++) {
+        if (anchor.endPattern.test(lines[i])) {
+          seen++;
+          if (seen >= needed) {
+            end = i;
+            break;
+          }
+        }
       }
+      range = { start, end };
     }
-    return { start, end: lines.length - 1 };
-  }, [lines, activeStep]);
+  }
 
   // Scroll the highlighted block into view on step change. Respects reduced motion.
   const containerRef = useRef<HTMLDivElement>(null);
