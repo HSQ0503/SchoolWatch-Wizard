@@ -1,25 +1,46 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import Image from "next/image";
 import type { WizardFormData } from "@/lib/types";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
-const inputClass =
-  "w-full rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] transition-colors focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)]";
+// Zine step-body primitives (shared visual language used by all 7 steps).
+const kickerCls =
+  "mb-3 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-ink-faded)]";
+const headlineCls =
+  "font-[900] leading-[0.95] tracking-[-0.02em] text-[color:var(--color-ink)]";
+const subcopyCls =
+  "mt-4 text-[15px] leading-[1.55] text-[color:var(--color-ink-soft)]";
+const labelCls =
+  "mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
+const underlineInputCls =
+  "w-full border-0 border-b-2 border-[color:var(--color-ink)] bg-transparent px-0 py-2 text-[18px] text-[color:var(--color-ink)] placeholder-[color:var(--color-ink-faded)]/60 focus:border-[color:var(--color-marker)] focus:outline-none";
 
-const labelClass =
-  "block text-xs text-[color:var(--color-text-faded)] mb-1.5";
-
-const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const headlineFont: React.CSSProperties = {
+  fontFamily: "var(--font-archivo)",
+  fontSize: "clamp(32px, 4.2vw, 52px)",
+};
+const italicAccent: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontStyle: "italic",
+  fontWeight: 400,
+  letterSpacing: "-0.01em",
+};
+const subcopyFont: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  maxWidth: "52ch",
+};
+const inputFont: React.CSSProperties = { fontFamily: "var(--font-display)" };
+const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 export default function StepSchoolInfo({ data, onChange }: StepProps) {
   const school = data.school;
   const nameRef = useRef<HTMLInputElement>(null);
-
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus school name on mount
   useEffect(() => { nameRef.current?.focus(); }, []);
 
   function updateSchool(patch: Partial<WizardFormData["school"]>) {
@@ -29,13 +50,10 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
   const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Max 2MB
     if (file.size > 2 * 1024 * 1024) {
       alert("Logo must be under 2MB");
       return;
     }
-
     const reader = new FileReader();
     reader.onload = () => {
       onChange({ ...data, logo: reader.result as string });
@@ -48,7 +66,6 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  // Auto-derive fields from school name to reduce typing
   function handleNameChange(name: string) {
     const patch: Partial<WizardFormData["school"]> = { name };
 
@@ -75,189 +92,214 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
   }
 
   return (
-    <div className="space-y-8" style={fontMono}>
-      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
-        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
-          <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
-          school_info
-        </h2>
-        <span className="text-[12px] text-[color:var(--color-text-faded)]">
-          — who are you building this for?
-        </span>
-      </div>
+    <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div>
+        <p className={kickerCls} style={kickerFont}>
+          step 01 / school info
+        </p>
+        <h1 className={headlineCls} style={headlineFont}>
+          Tell us about the <span style={italicAccent}>school.</span>
+        </h1>
+        <p className={subcopyCls} style={subcopyFont}>
+          Name, mascot, location. This shows up in the tab title, headings, and the URL — you can edit it later.
+        </p>
 
-      {/* Identity */}
-      <div className="divide-y divide-[color:var(--color-line)]">
-        <div className="grid grid-cols-[180px_1fr] items-start gap-4 py-2.5">
-          <div className={labelClass}>name <span className="text-[color:var(--color-accent)]">*</span></div>
+        <div className="mt-10 space-y-6">
           <div>
+            <label className={labelCls} style={labelFont}>School name</label>
             <input
               ref={nameRef}
-              className={inputClass}
-              type="text"
+              className={underlineInputCls}
+              style={inputFont}
               placeholder="Windermere Preparatory School"
               value={school.name}
               onChange={(e) => handleNameChange(e.target.value)}
             />
-            <p className="mt-1.5 text-[11px] text-[color:var(--color-text-faded)]">
-              Full legal name. Auto-fills short_name, acronym, and app_name.
-            </p>
           </div>
-        </div>
 
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>short_name</div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="Windermere Prep"
-            value={school.shortName}
-            onChange={(e) => updateSchool({ shortName: e.target.value })}
-          />
-        </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <label className={labelCls} style={labelFont}>Short name</label>
+              <input
+                className={underlineInputCls}
+                style={inputFont}
+                placeholder="Windermere Prep"
+                value={school.shortName}
+                onChange={(e) => updateSchool({ shortName: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className={labelCls} style={labelFont}>Acronym</label>
+              <input
+                className={underlineInputCls}
+                style={inputFont}
+                placeholder="WPS"
+                maxLength={4}
+                value={school.acronym}
+                onChange={(e) => updateSchool({ acronym: e.target.value.toUpperCase() })}
+              />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>acronym</div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="WPS"
-            maxLength={4}
-            value={school.acronym}
-            onChange={(e) => updateSchool({ acronym: e.target.value.toUpperCase() })}
-          />
-        </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <label className={labelCls} style={labelFont}>Mascot</label>
+              <input
+                className={underlineInputCls}
+                style={inputFont}
+                placeholder="Lakers"
+                value={school.mascot}
+                onChange={(e) => updateSchool({ mascot: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className={labelCls} style={labelFont}>App name (optional)</label>
+              <input
+                className={underlineInputCls}
+                style={inputFont}
+                placeholder="LakerWatch"
+                value={school.appName}
+                onChange={(e) => updateSchool({ appName: e.target.value })}
+              />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>mascot <span className="text-[color:var(--color-accent)]">*</span></div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="Lakers"
-            value={school.mascot}
-            onChange={(e) => updateSchool({ mascot: e.target.value })}
-          />
-        </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr_1fr]">
+            <div>
+              <label className={labelCls} style={labelFont}>City</label>
+              <input
+                className={underlineInputCls}
+                style={inputFont}
+                placeholder="Windermere"
+                value={school.city}
+                onChange={(e) => updateSchool({ city: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className={labelCls} style={labelFont}>State</label>
+              <input
+                className={underlineInputCls}
+                style={inputFont}
+                placeholder="Florida"
+                value={school.state}
+                onChange={(e) => updateSchool({ state: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className={labelCls} style={labelFont}>State code</label>
+              <input
+                className={underlineInputCls}
+                style={inputFont}
+                placeholder="FL"
+                maxLength={2}
+                value={school.stateCode}
+                onChange={(e) => updateSchool({ stateCode: e.target.value.toUpperCase() })}
+              />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>app_name</div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="LakerWatch"
-            value={school.appName}
-            onChange={(e) => updateSchool({ appName: e.target.value })}
-          />
-        </div>
-
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>city <span className="text-[color:var(--color-accent)]">*</span></div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="Orlando"
-            value={school.city}
-            onChange={(e) => updateSchool({ city: e.target.value })}
-          />
-        </div>
-
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>state <span className="text-[color:var(--color-accent)]">*</span></div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="Florida"
-            value={school.state}
-            onChange={(e) => updateSchool({ state: e.target.value })}
-          />
-        </div>
-
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>state_code <span className="text-[color:var(--color-accent)]">*</span></div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="FL"
-            maxLength={2}
-            value={school.stateCode}
-            onChange={(e) => updateSchool({ stateCode: e.target.value.toUpperCase() })}
-          />
-        </div>
-
-        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
-          <div className={labelClass}>academic_year <span className="text-[color:var(--color-accent)]">*</span></div>
-          <input
-            className={inputClass}
-            type="text"
-            placeholder="2025-2026"
-            value={school.academicYear}
-            onChange={(e) => updateSchool({ academicYear: e.target.value })}
-          />
-        </div>
-
-        <div className="grid grid-cols-[180px_1fr] items-start gap-4 py-2.5">
-          <div className={labelClass}>contact_email <span className="text-[color:var(--color-accent)]">*</span></div>
           <div>
+            <label className={labelCls} style={labelFont}>Academic year</label>
             <input
-              className={inputClass}
+              className={underlineInputCls}
+              style={inputFont}
+              placeholder="2025-2026"
+              value={school.academicYear}
+              onChange={(e) => updateSchool({ academicYear: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls} style={labelFont}>Contact email</label>
+            <input
+              className={underlineInputCls}
+              style={inputFont}
               type="email"
               placeholder="admin@school.edu"
               value={data.contactEmail}
               onChange={(e) => onChange({ ...data, contactEmail: e.target.value })}
             />
-            <p className="mt-1.5 text-[11px] text-[color:var(--color-text-faded)]">
-              Used for the magic link we send after deploy. Not public.
-            </p>
           </div>
-        </div>
 
-        {/* Logo — simplified, still binds to data.logo */}
-        <div className="grid grid-cols-[180px_1fr] items-start gap-4 py-2.5">
-          <div className={labelClass}>logo</div>
-          <div className="flex items-center gap-4">
-            {data.logo ? (
-              <div className="relative shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={data.logo}
-                  alt="School logo preview"
-                  className="h-14 w-14 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] object-contain"
-                />
-                <button
-                  onClick={removeLogo}
-                  className="absolute -top-2 -right-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-[color:var(--color-accent)] text-[10px] text-black hover:brightness-110"
-                  aria-label="Remove logo"
-                >
-                  ×
-                </button>
-              </div>
-            ) : (
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[3px] border border-dashed border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] text-[color:var(--color-text-faded)]">
-                ⟨img⟩
-              </div>
-            )}
-            <div className="flex-1">
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/png,image/jpeg,image/svg+xml,image/webp"
-                onChange={handleLogoUpload}
-                className="hidden"
-                id="logo-upload"
-              />
+          <div>
+            <label className={labelCls} style={labelFont}>School logo (optional, max 2MB)</label>
+            <div className="flex items-start gap-6">
               <label
-                htmlFor="logo-upload"
-                className="inline-block cursor-pointer rounded-[3px] border border-[color:var(--color-line-strong)] px-3 py-1.5 text-xs text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
+                className="flex h-[120px] w-[180px] cursor-pointer flex-col items-center justify-center border-2 border-dashed border-[color:var(--color-ink)] text-center transition-colors hover:bg-[color:var(--color-ink)]/5"
               >
-                {data.logo ? "change logo" : "upload logo"}
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
+                <span
+                  className="text-[color:var(--color-ink)]"
+                  style={{ fontFamily: "var(--font-caveat)", fontSize: 22, transform: "rotate(-2deg)" }}
+                >
+                  drop logo here ↙
+                </span>
               </label>
-              <p className="mt-1.5 text-[11px] text-[color:var(--color-text-faded)]">
-                png, jpg, svg, or webp · max 2MB
-              </p>
+              {data.logo && (
+                <div className="flex items-center gap-4">
+                  <div
+                    className="relative bg-white p-2.5 shadow-[4px_4px_0_var(--highlight)]"
+                    style={{ transform: "rotate(2deg)" }}
+                  >
+                    <Image
+                      src={data.logo}
+                      alt="Logo preview"
+                      width={80}
+                      height={80}
+                      className="h-20 w-20 object-contain"
+                      unoptimized
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeLogo}
+                    className="text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] underline underline-offset-4 decoration-[1.5px] transition-colors hover:text-[color:var(--color-marker)] hover:decoration-[color:var(--color-marker)] hover:[text-decoration-style:wavy]"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    remove
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Margin note — appears in the right rail on lg+, stacked above the form body on mobile. */}
+      <aside
+        className="order-first lg:order-last lg:pt-24"
+        aria-label="Tip"
+      >
+        <div
+          className="relative pl-5 border-l-[3px] border-[color:var(--color-ink)]"
+        >
+          <span
+            aria-hidden="true"
+            className="absolute -left-8 -top-1 leading-none"
+            style={{
+              fontFamily: "var(--font-caveat)",
+              fontWeight: 700,
+              fontSize: 28,
+              color: "var(--marker)",
+              transform: "rotate(-6deg)",
+            }}
+          >
+            1
+          </span>
+          <p
+            className="text-[15px] italic leading-[1.5] text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            No principal approval needed to start. You can deploy first and share — changing the name or colors later is a 10-second edit.
+          </p>
+        </div>
+      </aside>
     </div>
   );
 }
