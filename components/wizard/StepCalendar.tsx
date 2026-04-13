@@ -14,8 +14,6 @@ const subcopyCls =
 const labelCls =
   "mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
 
-void labelCls;
-
 const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const headlineFont: React.CSSProperties = {
   fontFamily: "var(--font-archivo)",
@@ -161,7 +159,7 @@ export default function StepCalendar({ data, onChange }: StepProps) {
         {/* No-school days */}
         <section className="mt-10">
           <p
-            className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]"
+            className={labelCls}
             style={labelFont}
           >
             No-school days
@@ -202,7 +200,7 @@ export default function StepCalendar({ data, onChange }: StepProps) {
         {/* Early dismissals */}
         <section>
           <p
-            className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]"
+            className={labelCls}
             style={labelFont}
           >
             Early dismissal
@@ -243,7 +241,7 @@ export default function StepCalendar({ data, onChange }: StepProps) {
         {/* Events */}
         <section>
           <p
-            className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]"
+            className={labelCls}
             style={labelFont}
           >
             Events
