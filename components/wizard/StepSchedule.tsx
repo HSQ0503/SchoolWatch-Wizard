@@ -249,6 +249,69 @@ export default function StepSchedule({ data, onChange }: StepProps) {
     updateSchedule({ dayTypes: newDayTypes });
   }
 
+  // ── Lunch wave handlers (Setup block) ────────────────────────────────
+  function setWaveCount(n: number) {
+    if (n === 0) {
+      // Disable waves: prune per-day-type wave periods and clear options.
+      const newBells: WizardFormData["schedule"]["bells"] = {};
+      for (const [id, block] of Object.entries(bells)) {
+        const { lunchWaves: _omit, ...rest } = block;
+        void _omit;
+        newBells[id] = { ...rest };
+      }
+      onChange({
+        ...data,
+        schedule: { ...data.schedule, bells: newBells },
+        lunchWaves: { enabled: false, options: [], default: "" },
+      });
+      return;
+    }
+
+    // Enable/resize: keep existing labels by id, seed new ones as "Wave K".
+    const existing = data.lunchWaves.options;
+    const newOptions: { id: string; label: string }[] = [];
+    for (let i = 0; i < n; i++) {
+      const id = `wave-${i + 1}`;
+      const prevLabel = existing.find((o) => o.id === id)?.label;
+      newOptions.push({ id, label: prevLabel ?? `Wave ${i + 1}` });
+    }
+
+    // Prune obsolete per-day-type wave period arrays.
+    const keepIds = new Set(newOptions.map((o) => o.id));
+    const newBells: WizardFormData["schedule"]["bells"] = {};
+    for (const [id, block] of Object.entries(bells)) {
+      const prunedWaves: Record<string, Period[]> = {};
+      if (block.lunchWaves) {
+        for (const [waveId, periods] of Object.entries(block.lunchWaves)) {
+          if (keepIds.has(waveId)) prunedWaves[waveId] = periods;
+        }
+      }
+      newBells[id] = { ...block, lunchWaves: prunedWaves };
+    }
+
+    onChange({
+      ...data,
+      schedule: { ...data.schedule, bells: newBells },
+      lunchWaves: { enabled: true, options: newOptions, default: newOptions[0].id },
+    });
+  }
+
+  function setWaveLabel(waveId: string, label: string) {
+    const newOptions = data.lunchWaves.options.map((o) =>
+      o.id === waveId ? { ...o, label } : o,
+    );
+    onChange({ ...data, lunchWaves: { ...data.lunchWaves, options: newOptions } });
+  }
+
+  const currentWaveCount = data.lunchWaves.enabled ? data.lunchWaves.options.length : 0;
+  const waveChipValues = (() => {
+    const base = [0, 2, 3, 4];
+    if (currentWaveCount <= 4) return base;
+    const extras: number[] = [];
+    for (let k = 5; k <= currentWaveCount; k++) extras.push(k);
+    return [...base, ...extras];
+  })();
+
   // Current bells block for the active day type
   const activeBlock = bells[activeDayType?.id] ?? { shared: [], after: [] };
   const sharedPeriods = activeBlock.shared;
@@ -317,90 +380,169 @@ export default function StepSchedule({ data, onChange }: StepProps) {
             Build the <span style={italicAccent}>schedule.</span>
           </motion.h1>
           <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
-            Set up day types (regular, early dismissal, half day, etc.) and the bell periods for each. You can edit any of this later.
+            First, define your day types and lunch rotations. Then fill in bell periods for each day type.
           </motion.p>
         </motion.div>
 
-        {/* Day-type chip strip */}
-        <div className="mt-10 flex flex-wrap items-center gap-2">
-          {dayTypes.map((dt, i) => {
-            const isActive = i === activeDayTypeIndex;
-            return (
+        {/* ── Setup block ──────────────────────────────────────────────── */}
+        <div className="mt-10 border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] p-6">
+          <p
+            className="mb-5 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-ink)]"
+            style={labelFont}
+          >
+            Setup
+          </p>
+
+          {/* Day types sub-section */}
+          <div>
+            <p className={labelCls} style={labelFont}>Day types</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {dayTypes.map((dt, i) => {
+                const isActive = i === activeDayTypeIndex;
+                return (
+                  <button
+                    key={dt.id}
+                    type="button"
+                    onClick={() => setActiveDayTypeIndex(i)}
+                    className={`cursor-pointer border-[1.5px] border-[color:var(--color-ink)] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] transition-colors ${
+                      isActive
+                        ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                        : "bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/5"
+                    }`}
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {dt.label || "Untitled"}
+                  </button>
+                );
+              })}
               <button
-                key={dt.id}
                 type="button"
-                onClick={() => setActiveDayTypeIndex(i)}
-                className={`cursor-pointer border-[1.5px] border-[color:var(--color-ink)] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] transition-colors ${
-                  isActive
-                    ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
-                    : "bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/5"
-                }`}
+                onClick={addDayType}
+                className="cursor-pointer border-[1.5px] border-dashed border-[color:var(--color-ink)] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/5"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
-                {dt.label || "Untitled"}
+                + add day type
               </button>
-            );
-          })}
-          <button
-            type="button"
-            onClick={addDayType}
-            className="cursor-pointer border-[1.5px] border-dashed border-[color:var(--color-ink)] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/5"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
-            + add day type
-          </button>
-        </div>
-
-        {/* Active day type detail panel */}
-        {activeDayType && (
-          <div className="mt-8">
-            {/* Rename + remove row */}
-            <div className="flex items-baseline justify-between gap-4">
-              <input
-                className="flex-1 border-0 border-b-2 border-[color:var(--color-ink)] bg-transparent py-1.5 text-[20px] text-[color:var(--color-ink)] placeholder-[color:var(--color-ink-faded)]/60 focus:border-[color:var(--color-marker)] focus:outline-none"
-                style={{ fontFamily: "var(--font-display)" }}
-                placeholder="Day type name"
-                aria-label="Day type name"
-                value={activeDayType.label}
-                onChange={(e) => updateDayTypeLabel(e.target.value)}
-              />
-              {dayTypes.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeDayType(activeDayTypeIndex)}
-                  className="shrink-0 cursor-pointer text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink-faded)] underline underline-offset-4 hover:text-[color:var(--color-marker)]"
-                  style={{ fontFamily: "var(--font-mono)" }}
-                >
-                  remove day type
-                </button>
-              )}
             </div>
 
-            {/* Weekday toggles */}
-            <div className="mt-6">
-              <p className={labelCls} style={labelFont}>Weekdays</p>
-              <div className="mt-2 flex gap-2">
-                {WEEKDAYS.map((w) => (
+            {activeDayType && (
+              <div className="mt-5">
+                <div className="flex items-baseline justify-between gap-4">
+                  <input
+                    className="flex-1 border-0 border-b-2 border-[color:var(--color-ink)] bg-transparent py-1.5 text-[18px] text-[color:var(--color-ink)] placeholder-[color:var(--color-ink-faded)]/60 focus:border-[color:var(--color-marker)] focus:outline-none"
+                    style={{ fontFamily: "var(--font-display)" }}
+                    placeholder="Day type name"
+                    aria-label="Day type name"
+                    value={activeDayType.label}
+                    onChange={(e) => updateDayTypeLabel(e.target.value)}
+                  />
+                  {dayTypes.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeDayType(activeDayTypeIndex)}
+                      className="shrink-0 cursor-pointer text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink-faded)] underline underline-offset-4 hover:text-[color:var(--color-marker)]"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      remove day type
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-4">
+                  <p className={labelCls} style={labelFont}>Weekdays</p>
+                  <div className="mt-2 flex gap-2">
+                    {WEEKDAYS.map((w) => (
+                      <button
+                        key={w.value}
+                        type="button"
+                        onClick={() => toggleWeekday(w.value)}
+                        aria-pressed={activeDayType.weekdays.includes(w.value)}
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center border-[1.5px] border-[color:var(--color-ink)] text-[11px] font-semibold transition-colors"
+                        style={{
+                          background: activeDayType.weekdays.includes(w.value)
+                            ? "var(--highlight)"
+                            : "transparent",
+                          fontFamily: "var(--font-mono)",
+                        }}
+                      >
+                        {w.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Lunch waves sub-section */}
+          <div className="mt-8 border-t border-dashed border-[color:var(--color-hairline)] pt-6">
+            <p className={labelCls} style={labelFont}>Lunch waves</p>
+            <p
+              className="mt-1 text-[13px] italic text-[color:var(--color-ink-soft)]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Some schools split lunch across multiple rotations. Pick how many, or leave as None.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {waveChipValues.map((n) => {
+                const isActive = currentWaveCount === n;
+                const label = n === 0 ? "None" : String(n);
+                return (
                   <button
-                    key={w.value}
+                    key={n}
                     type="button"
-                    onClick={() => toggleWeekday(w.value)}
-                    aria-pressed={activeDayType.weekdays.includes(w.value)}
-                    className="flex h-8 w-8 cursor-pointer items-center justify-center border-[1.5px] border-[color:var(--color-ink)] text-[11px] font-semibold transition-colors"
-                    style={{
-                      background: activeDayType.weekdays.includes(w.value)
-                        ? "var(--highlight)"
-                        : "transparent",
-                      fontFamily: "var(--font-mono)",
-                    }}
+                    onClick={() => setWaveCount(n)}
+                    aria-pressed={isActive}
+                    className={`cursor-pointer border-[1.5px] border-[color:var(--color-ink)] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] transition-colors ${
+                      isActive
+                        ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                        : "bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/5"
+                    }`}
+                    style={{ fontFamily: "var(--font-mono)" }}
                   >
-                    {w.label}
+                    {label}
                   </button>
+                );
+              })}
+            </div>
+
+            {currentWaveCount > 0 && (
+              <div className="mt-5 space-y-3">
+                {data.lunchWaves.options.map((wave) => (
+                  <div
+                    key={wave.id}
+                    className="flex items-center gap-3 border-l-[2px] border-[color:var(--color-ink)] pl-4"
+                  >
+                    <input
+                      aria-label={`${wave.id} label`}
+                      className="flex-1 border-0 border-b-[1.5px] border-[color:var(--color-ink)] bg-transparent py-1.5 text-[16px] text-[color:var(--color-ink)] focus:border-[color:var(--color-marker)] focus:outline-none"
+                      style={{ fontFamily: "var(--font-display)" }}
+                      value={wave.label}
+                      placeholder="Wave name"
+                      onChange={(e) => setWaveLabel(wave.id, e.target.value)}
+                    />
+                  </div>
                 ))}
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Bell periods / lunch wave split */}
+        {/* ── Bell periods divider ──────────────────────────────────────── */}
+        {activeDayType && (
+          <div className="mt-10">
+            <p
+              className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-ink)]"
+              style={labelFont}
+            >
+              Bell periods — {activeDayType.label || "Untitled"}
+            </p>
+          </div>
+        )}
+
+        {/* ── Period tables (unchanged behavior) ────────────────────────── */}
+        {activeDayType && (
+          <div>
             {!lunchWavesEnabled ? (
               <>
                 <PeriodTable
@@ -410,7 +552,6 @@ export default function StepSchedule({ data, onChange }: StepProps) {
                   onRemove={removeSharedPeriod}
                   onUpdate={updateSharedPeriod}
                 />
-                {/* After-school events (non-wave path) */}
                 <div className="mt-10 border-t border-dashed border-[color:var(--color-hairline)] pt-8">
                   <PeriodTable
                     sectionLabel="After school"
@@ -483,7 +624,7 @@ export default function StepSchedule({ data, onChange }: StepProps) {
             className="text-[15px] italic leading-[1.5] text-[color:var(--color-ink-soft)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Regular day covers most weeks. Add a second day type only if your school has recurring variations (early dismissals, pep rally schedules, testing weeks, etc.).
+            Set up day types and lunch waves first — then fill in bell periods for each. Most schools just need one day type and no waves.
           </p>
         </div>
       </aside>
