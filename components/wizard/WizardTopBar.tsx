@@ -1,32 +1,32 @@
 import Kbd from "./Kbd";
 
 // Sticky app bar: SW monogram + version + connection dot + keyboard hints.
-// Reference: wizard-terminal.html — .appbar block
+// Dark ink strip sitting atop the paper theme — mirrors how ZineNav sits atop the homepage.
 export default function WizardTopBar() {
   return (
     <div
-      className="flex items-center justify-between border-b border-[color:var(--color-line)] bg-[color:var(--color-bg-raised)] px-[18px] py-2.5 text-[11px]"
-      style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}
+      className="sticky top-0 z-30 flex items-center justify-between bg-[color:var(--color-ink)] px-[18px] py-2.5 text-[11px] text-[color:var(--color-paper)]"
+      style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}
     >
       <div className="flex items-center gap-3.5">
-        <div
-          className="border border-[color:var(--color-foreground)] px-1.5 py-0.5 text-[11px] font-extrabold tracking-[0.08em] text-[color:var(--color-foreground)]"
-          style={{ fontFamily: "var(--font-mono)" }}
+        <span
+          className="border border-[color:var(--color-paper)] px-1.5 py-0.5 text-[11px] font-extrabold tracking-[0.08em]"
+          style={{ fontFamily: "var(--font-archivo)" }}
         >
           SW
-        </div>
-        <div className="text-[color:var(--color-text-faded)]">
+        </span>
+        <span className="text-[color:var(--color-paper)]/70">
           schoolwatch · wizard · v0.3.2
-        </div>
-        <div className="flex items-center gap-1.5 text-[color:var(--color-text-faded)]">
+        </span>
+        <span className="flex items-center gap-1.5 text-[color:var(--color-paper)]/70">
           <span
             aria-hidden="true"
-            className="inline-block h-[7px] w-[7px] animate-pulse rounded-full bg-[color:var(--color-ok)] shadow-[0_0_8px_var(--color-ok)]"
+            className="inline-block h-[7px] w-[7px] animate-pulse rounded-full bg-[#10b981] shadow-[0_0_8px_#10b981]"
           />
           connected
-        </div>
+        </span>
       </div>
-      <div className="flex gap-[18px] text-[color:var(--color-text-faded)]">
+      <div className="hidden gap-[18px] text-[color:var(--color-paper)]/70 sm:flex">
         <span>
           <Kbd>⌘</Kbd> <Kbd>K</Kbd> commands
         </span>

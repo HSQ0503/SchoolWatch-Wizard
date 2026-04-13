@@ -31,11 +31,12 @@
   color: var(--ink);
 }
 
-/* Hide native scrollbar on pages using the zine theme — a custom progress bar replaces it. */
-html:has(.theme-zine) {
+/* Hide native scrollbar on the landing page only — a custom progress bar replaces it there.
+   Wizard pages use `.theme-zine` but NOT `.theme-zine-landing`, so they keep the scrollbar. */
+html:has(.theme-zine-landing) {
   scrollbar-width: none;
 }
-html:has(.theme-zine)::-webkit-scrollbar {
+html:has(.theme-zine-landing)::-webkit-scrollbar {
   display: none;
 }
 

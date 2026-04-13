@@ -123,48 +123,69 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
     : null;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col" aria-live="polite">
-      <div
-        className="flex items-center justify-between border-b border-[color:var(--color-line)] bg-[color:var(--color-background)] px-[18px] py-2.5 text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-faded)]"
-        style={{ fontFamily: "var(--font-mono)" }}
-      >
-        <span>deploy.log</span>
-        <span className="text-[color:var(--color-text-dim)]">
-          <b className="font-medium text-[color:var(--color-ok)]">
-            {state === "done" ? "done" : state === "error" ? "failed" : "running"}
-          </b>
+    <div className="mt-8" aria-live="polite">
+      <div className="flex items-center justify-between border-b border-[color:var(--color-ink)] pb-2 mb-4">
+        <span
+          className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
+          deploy log
+        </span>
+        <span
+          className="text-[11px] italic"
+          style={{
+            fontFamily: "var(--font-display)",
+            color:
+              state === "done"
+                ? "#3a7d5c"
+                : state === "error"
+                ? "var(--marker)"
+                : "var(--ink-faded)",
+          }}
+        >
+          {state === "done" ? "done" : state === "error" ? "failed" : "running"}
         </span>
       </div>
       <div
         ref={scrollRef}
-        className="m-[14px] max-h-[400px] flex-1 overflow-y-auto rounded border border-[color:var(--color-line-strong)] bg-black p-[14px] text-[12px] leading-[1.8]"
+        className="max-h-[360px] space-y-1 overflow-y-auto bg-white border border-[color:var(--color-hairline)] p-4 text-[13px] text-[color:var(--color-ink)]"
         style={{ fontFamily: "var(--font-mono)" }}
       >
         {entries.map((e, i) => (
-          <div key={i} className="flex items-start gap-2.5" role="status">
-            <span className="min-w-[65px] text-[color:var(--color-text-faded)]">
-              {e.t}
-            </span>
+          <div key={i} className="flex items-start gap-3" role="status">
+            <span className="min-w-[60px] text-[color:var(--color-ink-faded)]">{e.t}</span>
             {e.kind === "ok" && (
-              <span className="text-[color:var(--color-ok)]">✓ {e.text}</span>
+              <span className="text-[color:var(--color-ink)]">
+                <span className="mr-1.5 text-[#3a7d5c]">✓</span>
+                {e.text}
+              </span>
             )}
             {e.kind === "info" && (
-              <span className="text-[color:var(--color-text-dim)]">{e.text}</span>
+              <span className="text-[color:var(--color-ink-soft)]">{e.text}</span>
             )}
             {e.kind === "pending" && (
-              <span className="animate-pulse text-[color:var(--color-warn)]">
+              <span
+                className="italic text-[color:var(--color-ink-soft)] motion-safe:animate-pulse"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 ● {e.text}
               </span>
             )}
             {e.kind === "err" && (
-              <span className="text-[color:var(--color-accent)]">✗ {e.text}</span>
+              <span className="text-[color:var(--color-marker)]">
+                <span className="mr-1.5">✗</span>
+                {e.text}
+              </span>
             )}
           </div>
         ))}
         {pendingLabel && (
-          <div className="flex items-start gap-2.5" role="status">
-            <span className="min-w-[65px] text-[color:var(--color-text-faded)]" />
-            <span className="animate-pulse text-[color:var(--color-warn)]">
+          <div className="flex items-start gap-3" role="status">
+            <span className="min-w-[60px] text-[color:var(--color-ink-faded)]" />
+            <span
+              className="italic text-[color:var(--color-ink-soft)] motion-safe:animate-pulse"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
               ● {pendingLabel}
             </span>
           </div>

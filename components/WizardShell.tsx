@@ -6,7 +6,6 @@ import { validateStep } from "@/lib/validation";
 import WizardTopBar from "@/components/wizard/WizardTopBar";
 import ProgressStrip from "@/components/wizard/ProgressStrip";
 import StatusBar from "@/components/wizard/StatusBar";
-import ConfigPreview from "@/components/wizard/ConfigPreview";
 
 export const STEPS = [
   "School Info",
@@ -82,16 +81,24 @@ class StepErrorBoundary extends Component<
     if (this.state.error) {
       return (
         <div
-          className="border border-[color:var(--color-accent)]/40 bg-[rgba(255,99,99,0.08)] p-6 text-center"
-          style={{ fontFamily: "var(--font-mono)" }}
+          className="border-l-[3px] border-[color:var(--color-marker)] bg-[color:var(--color-marker)]/5 p-6"
         >
-          <p className="text-[color:var(--color-accent)] font-semibold mb-2">
-            ✗ step failed to render
+          <p
+            className="mb-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-marker)]"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            step failed to render
           </p>
-          <p className="text-[color:var(--color-text-dim)] text-sm font-mono break-all">
+          <p
+            className="break-all text-[15px] italic text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             {this.state.error.message}
           </p>
-          <p className="text-[color:var(--color-text-faded)] text-xs mt-3">
+          <p
+            className="mt-3 text-[11px] text-[color:var(--color-ink-faded)]"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
             check browser console for full stack trace
           </p>
         </div>
@@ -140,7 +147,7 @@ export default function WizardShell({ steps, initialData, schoolId }: WizardShel
       `[WizardShell] No step component at index ${currentStep}. Steps array length: ${steps.length}`
     );
     return (
-      <div className="p-8 text-[color:var(--color-accent)]">
+      <div className="p-8 text-[color:var(--color-marker)]">
         Error: No step component at index {currentStep}
       </div>
     );
@@ -170,14 +177,7 @@ export default function WizardShell({ steps, initialData, schoolId }: WizardShel
       : `${currentErrors.length} issue${currentErrors.length === 1 ? "" : "s"} to fix`;
 
   return (
-    <div
-      className="flex min-h-screen flex-col bg-[color:var(--background)] text-[color:var(--color-foreground)]"
-      style={{
-        backgroundImage:
-          "linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)",
-        backgroundSize: "32px 32px",
-      }}
-    >
+    <div className="theme-zine flex min-h-screen flex-col bg-[color:var(--paper)] text-[color:var(--color-ink)]">
       <WizardTopBar />
       <ProgressStrip
         current={currentStep}
@@ -185,36 +185,38 @@ export default function WizardShell({ steps, initialData, schoolId }: WizardShel
         label={STEPS[currentStep].toLowerCase()}
       />
 
-      {/* Two-pane layout. On small screens the right pane stacks under. */}
-      <div className="grid flex-1 grid-cols-1 md:grid-cols-[1fr_460px]">
-        <main className="min-w-0 border-r border-[color:var(--color-line)] px-8 py-8">
+      {/* Single-pane layout. Each step's body handles its own max-width + decoration. */}
+      <main className="flex-1 px-6 py-10 sm:px-8 md:px-10 lg:px-14">
+        <div className="mx-auto max-w-[1120px]">
           <StepErrorBoundary stepIndex={currentStep} key={currentStep}>
             <StepComponent key={currentStep} data={data} onChange={setData} schoolId={schoolId} />
           </StepErrorBoundary>
 
           {showErrors && errors.length > 0 && (
             <div
-              className="mt-8 border border-[color:var(--color-warn)]/40 bg-[rgba(245,158,11,0.08)] px-4 py-3"
-              style={{ fontFamily: "var(--font-mono)" }}
+              className="mt-10 border-l-[3px] border-[color:var(--color-marker)] bg-[color:var(--color-marker)]/5 px-5 py-4"
+              style={{ fontFamily: "var(--font-display)" }}
             >
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--color-warn)]">
-                ▲ fix the following:
+              <p
+                className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-marker)]"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                fix the following
               </p>
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {errors.map((err, i) => (
-                  <li key={i} className="text-sm text-[color:var(--color-text-dim)]">
+                  <li
+                    key={i}
+                    className="text-[15px] italic text-[color:var(--color-ink-soft)]"
+                  >
                     {err}
                   </li>
                 ))}
               </ul>
             </div>
           )}
-        </main>
-
-        <aside className="flex min-h-[300px] min-w-0 flex-col bg-[color:var(--color-bg-raised)]">
-          <ConfigPreview data={data} activeStep={currentStep} />
-        </aside>
-      </div>
+        </div>
+      </main>
 
       <StatusBar
         status={status}

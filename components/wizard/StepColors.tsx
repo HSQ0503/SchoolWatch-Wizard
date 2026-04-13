@@ -5,16 +5,69 @@ import { defaultLightColors, resolveDarkColors } from "@/lib/colors";
 import type { ZoneColors } from "@/lib/colors";
 import type { WizardFormData } from "@/lib/types";
 import DashboardPreview from "./DashboardPreview";
+import TapedScreenshot from "@/components/landing/TapedScreenshot";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = {
   data: WizardFormData;
   onChange: (data: WizardFormData) => void;
 };
 
-const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+// Zine step-body primitives (shared visual language used by all 7 steps).
+const kickerCls =
+  "mb-3 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-ink-faded)]";
+const headlineCls =
+  "font-[900] leading-[0.95] tracking-[-0.02em] text-[color:var(--color-ink)]";
+const subcopyCls =
+  "mt-4 text-[15px] leading-[1.55] text-[color:var(--color-ink-soft)]";
+const labelCls =
+  "mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
+const underlineInputCls =
+  "w-full border-0 border-b-2 border-[color:var(--color-ink)] bg-transparent px-0 py-2 text-[18px] text-[color:var(--color-ink)] placeholder-[color:var(--color-ink-faded)]/60 focus:border-[color:var(--color-marker)] focus:outline-none";
 
+const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const headlineFont: React.CSSProperties = {
+  fontFamily: "var(--font-archivo)",
+  fontSize: "clamp(32px, 4.2vw, 52px)",
+};
+const italicAccent: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontStyle: "italic",
+  fontWeight: 400,
+  letterSpacing: "-0.01em",
+};
+const subcopyFont: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  maxWidth: "52ch",
+};
+const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+
+// Suppress unused-variable lint for underlineInputCls (kept for consistency with other steps).
+void underlineInputCls;
+void subcopyFont;
+
+const ZONE_ORDER: (keyof ZoneColors)[] = [
+  "navbar",
+  "navText",
+  "background",
+  "heading",
+  "ring",
+  "surface",
+  "cardAccent",
+  "badge",
+];
 
 export default function StepColors({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   const { primary, accent } = data.colors;
 
   const [overriddenZones, setOverriddenZones] = useState<Set<string>>(
@@ -24,9 +77,9 @@ export default function StepColors({ data, onChange }: StepProps) {
     zone: keyof ZoneColors;
     mode: "light" | "dark";
   } | null>(null);
-  const [darkMode, setDarkMode] = useState<
-    "hidden" | "preview" | "customize"
-  >("hidden");
+  const [darkMode, setDarkMode] = useState<"hidden" | "preview" | "customize">(
+    "hidden"
+  );
 
   // Compute resolved dark colors for preview/customize
   const resolvedDark = resolveDarkColors(data.colors.light, data.colors.dark);
@@ -148,120 +201,218 @@ export default function StepColors({ data, onChange }: StepProps) {
       ? data.colors.light[activeZone.zone as keyof ZoneColors]
       : resolvedDark[activeZone.zone as keyof ZoneColors]);
 
+  const currentMode: "light" | "dark" = showingDark ? "dark" : "light";
+
   return (
-    <div className="space-y-8" style={fontMono}>
-      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
-        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
-          <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
-          colors
-        </h2>
-        <span className="text-[12px] text-[color:var(--color-text-faded)]">
-          — two seeds cascade into eight zones. click any zone on the mockup to override.
-        </span>
-      </div>
-
-      {/* Seeds */}
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
+      {/* Left column */}
       <div>
-        <div className="mb-2 text-[11px] uppercase tracking-[0.1em] text-[color:var(--color-text-faded)]">
-          seeds
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { key: "primary" as const, label: "Primary" },
-            { key: "accent" as const, label: "Accent" },
-          ].map(({ key, label }) => (
-            <div
-              key={key}
-              className="grid grid-cols-[40px_1fr] items-center gap-2.5 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] p-2.5"
-            >
-              <input
-                type="color"
-                value={(key === "primary" ? primary : accent) || "#000000"}
-                onChange={(e) => updateSeeds({ [key]: e.target.value })}
-                className="h-10 w-10 cursor-pointer rounded border border-white/10 bg-transparent p-0"
-                aria-label={`Pick ${label} color`}
-              />
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.1em] text-[color:var(--color-text-faded)]">
-                  {label}
-                </div>
-                <input
-                  className="w-full bg-transparent text-[13px] text-[color:var(--color-foreground)] focus:outline-none"
-                  style={fontMono}
-                  type="text"
-                  maxLength={7}
-                  value={key === "primary" ? primary : accent}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (/^#[0-9a-fA-F]{0,6}$/.test(val))
-                      updateSeeds({ [key]: val });
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>
+            step 02 / colors
+          </motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Pick the <span style={italicAccent}>palette.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={{ fontFamily: "var(--font-display)", maxWidth: "52ch" }}>
+            Pick two seed colors — primary (for most of the interface) and accent
+            (for small highlights). We&rsquo;ll fill in the rest, and you can
+            override any individual zone below.
+          </motion.p>
+        </motion.div>
 
-      {/* Zones — click on the dashboard below to edit */}
-      <div>
-        <div className="mb-2 flex justify-between text-[11px] uppercase tracking-[0.1em] text-[color:var(--color-text-faded)]">
-          <span>zones</span>
-          <span className="text-[color:var(--color-accent)]">* = overridden</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          {(Object.keys(palette) as (keyof typeof palette)[]).map((zone) => {
-            const overridden = overriddenZones.has(zone);
-            return (
-              <div
-                key={zone}
-                className={`grid cursor-pointer grid-cols-[20px_1fr_70px] items-center gap-2 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-2.5 py-1.5 text-[11px] transition-colors hover:border-[color:var(--color-accent)] ${
-                  overridden ? "border-l-2 border-l-[color:var(--color-accent)]" : ""
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (zoneClickable) {
-                    setActiveZone({
-                      zone,
-                      mode: showingDark ? "dark" : "light",
-                    });
-                  }
-                }}
+        {/* Inline tip */}
+        <p
+          className="mt-6 text-[14px] italic text-[color:var(--color-marker)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Pick one strong color and one quiet one. The preview on the right
+          updates live — tweak until it looks like you.
+        </p>
+
+        {/* Seed swatches */}
+        <div className="mt-8 flex flex-col gap-6 sm:flex-row">
+          {/* Primary seed */}
+          <label className="flex cursor-pointer items-center gap-4">
+            <span
+              className="block h-24 w-24 border-2 border-[color:var(--color-ink)]"
+              style={{ background: data.colors.primary }}
+            />
+            <input
+              type="color"
+              value={data.colors.primary || "#000000"}
+              onChange={(e) => updateSeeds({ primary: e.target.value })}
+              className="sr-only"
+            />
+            <div>
+              <p className={labelCls} style={labelFont}>
+                Primary seed
+              </p>
+              <p
+                className="text-[15px] text-[color:var(--color-ink)]"
+                style={{ fontFamily: "var(--font-mono)" }}
               >
-                <span
-                  className="h-4 w-4 rounded-[2px] border border-white/10"
-                  style={{ background: palette[zone] }}
-                />
-                <span className="text-[color:var(--color-foreground)]" style={fontMono}>
-                  {zone}
-                  {overridden && <span className="text-[color:var(--color-accent)]"> *</span>}
-                </span>
-                <span
-                  className="text-right text-[10px] text-[color:var(--color-text-faded)]"
-                  style={fontMono}
+                {(data.colors.primary || "#000000").toUpperCase()}
+              </p>
+            </div>
+          </label>
+
+          {/* Accent seed */}
+          <label className="flex cursor-pointer items-center gap-4">
+            <span
+              className="block h-24 w-24 border-2 border-[color:var(--color-ink)]"
+              style={{ background: data.colors.accent }}
+            />
+            <input
+              type="color"
+              value={data.colors.accent || "#000000"}
+              onChange={(e) => updateSeeds({ accent: e.target.value })}
+              className="sr-only"
+            />
+            <div>
+              <p className={labelCls} style={labelFont}>
+                Accent seed
+              </p>
+              <p
+                className="text-[15px] text-[color:var(--color-ink)]"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                {(data.colors.accent || "#000000").toUpperCase()}
+              </p>
+            </div>
+          </label>
+        </div>
+
+        {/* Individual zones */}
+        <div className="mt-10">
+          <p className={labelCls} style={labelFont}>
+            Individual zones
+          </p>
+          <div>
+            {ZONE_ORDER.map((zone) => {
+              const isOverridden = overriddenZones.has(zone);
+              const zoneColor = palette[zone] || "#000000";
+              return (
+                <div
+                  key={zone}
+                  className="flex items-center justify-between gap-4 border-b border-dashed border-[color:var(--color-hairline)] py-3 last:border-b-0"
                 >
-                  {palette[zone]}
-                </span>
-              </div>
-            );
-          })}
+                  <div>
+                    <p
+                      className="text-[13px] text-[color:var(--color-ink)]"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      {zone}
+                    </p>
+                    {isOverridden && (
+                      <p
+                        className="text-[11px] italic text-[color:var(--color-marker)]"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        custom
+                      </p>
+                    )}
+                  </div>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <span
+                      className="block h-8 w-8 border border-[color:var(--color-ink)]"
+                      style={{ background: zoneColor }}
+                    />
+                    <input
+                      type="color"
+                      value={zoneColor}
+                      onChange={(e) =>
+                        updateZoneColor(zone, e.target.value, currentMode)
+                      }
+                      className="sr-only"
+                    />
+                    <span
+                      className="text-[12px] text-[color:var(--color-ink-faded)]"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      {zoneColor.toUpperCase()}
+                    </span>
+                    {isOverridden && currentMode === "light" && (
+                      <button
+                        type="button"
+                        onClick={() => resetZone(zone, "light")}
+                        className="ml-2 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] underline underline-offset-2 hover:text-[color:var(--color-marker)]"
+                        style={{ fontFamily: "var(--font-mono)" }}
+                      >
+                        reset
+                      </button>
+                    )}
+                  </label>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Live dashboard preview (inline-styled because palette is arbitrary hex) */}
-      <div>
-        <div className="mb-2 text-[11px] uppercase tracking-[0.1em] text-[color:var(--color-text-faded)]">
-          live preview · {showingDark ? "dark" : "light"}
+      {/* Right column — live preview pinned */}
+      <div className="lg:sticky lg:top-[100px] lg:self-start lg:z-10">
+        <TapedScreenshot
+          rotation={-1.5}
+          tapes={[
+            { position: "top-left", color: "yellow" },
+            { position: "top-right", color: "red" },
+          ]}
+        >
+          <DashboardPreview
+            palette={palette}
+            showingDark={showingDark}
+            appName={data.school.appName}
+            zoneProps={zoneProps}
+          />
+        </TapedScreenshot>
+
+        {/* Dark mode toggle — ink-bordered chip buttons */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setDarkMode("hidden")}
+            className={`border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-colors ${
+              darkMode === "hidden"
+                ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                : "border-[color:var(--color-ink)] bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/10"
+            }`}
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            light
+          </button>
+          <button
+            type="button"
+            onClick={() => setDarkMode("preview")}
+            className={`border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-colors ${
+              darkMode === "preview"
+                ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                : "border-[color:var(--color-ink)] bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/10"
+            }`}
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            dark preview
+          </button>
+          <button
+            type="button"
+            onClick={() => setDarkMode("customize")}
+            className={`border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-colors ${
+              darkMode === "customize"
+                ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                : "border-[color:var(--color-ink)] bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/10"
+            }`}
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            customize dark
+          </button>
         </div>
-        <DashboardPreview
-          palette={palette}
-          showingDark={showingDark}
-          appName={data.school.appName}
-          zoneProps={zoneProps}
-        />
       </div>
 
-      {/* Zone popover */}
+      {/* Zone popover — fixed overlay */}
       {activeZone && (
         <div
           style={{
@@ -276,30 +427,74 @@ export default function StepColors({ data, onChange }: StepProps) {
           onClick={() => setActiveZone(null)}
         >
           <div
-            className="rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-raised)] p-5"
-            style={{ width: 280, fontFamily: "var(--font-mono)" }}
+            style={{
+              width: 280,
+              fontFamily: "var(--font-mono)",
+              background: "var(--color-paper)",
+              border: "2px solid var(--color-ink)",
+              padding: "20px",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm font-semibold text-[color:var(--color-foreground)]">
+            <div
+              style={{
+                marginBottom: 16,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "var(--color-ink)",
+                }}
+              >
                 {activeZone.zone}
               </span>
               <button
                 onClick={() => setActiveZone(null)}
-                className="cursor-pointer bg-transparent text-[color:var(--color-text-faded)] hover:text-[color:var(--color-foreground)]"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 18,
+                  color: "var(--color-ink-faded)",
+                  lineHeight: 1,
+                  padding: 0,
+                }}
                 aria-label="Close"
               >
                 ×
               </button>
             </div>
-            <div className="mb-4 flex items-center gap-3">
+            <div
+              style={{
+                marginBottom: 16,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
               <input
                 type="color"
                 value={activeColor || "#000000"}
                 onChange={(e) =>
-                  updateZoneColor(activeZone.zone, e.target.value, activeZone.mode)
+                  updateZoneColor(
+                    activeZone.zone,
+                    e.target.value,
+                    activeZone.mode
+                  )
                 }
-                className="h-10 w-12 cursor-pointer rounded border border-white/10 bg-transparent p-0"
+                style={{
+                  height: 40,
+                  width: 48,
+                  cursor: "pointer",
+                  border: "2px solid var(--color-ink)",
+                  background: "transparent",
+                  padding: 0,
+                }}
               />
               <input
                 type="text"
@@ -310,67 +505,39 @@ export default function StepColors({ data, onChange }: StepProps) {
                   if (/^#[0-9a-fA-F]{0,6}$/.test(val))
                     updateZoneColor(activeZone.zone, val, activeZone.mode);
                 }}
-                className="flex-1 bg-[color:var(--color-bg-input)] px-2 py-1.5 text-[13px] text-[color:var(--color-foreground)] focus:outline-none"
-                style={{ fontFamily: "var(--font-mono)" }}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "0",
+                  borderBottom: "2px solid var(--color-ink)",
+                  padding: "4px 0",
+                  fontSize: 15,
+                  color: "var(--color-ink)",
+                  fontFamily: "var(--font-mono)",
+                  outline: "none",
+                }}
               />
             </div>
             <button
               onClick={() => resetZone(activeZone.zone, activeZone.mode)}
-              className="cursor-pointer bg-transparent text-xs text-[color:var(--color-text-faded)] underline hover:text-[color:var(--color-foreground)]"
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                color: "var(--color-ink-faded)",
+                textDecoration: "underline",
+                fontFamily: "var(--font-mono)",
+                padding: 0,
+              }}
             >
               reset to default
             </button>
           </div>
         </div>
       )}
-
-      {/* Dark mode controls */}
-      <div className="rounded-[3px] border border-[color:var(--color-line-strong)] px-4 py-3.5">
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          <span className="text-sm text-[color:var(--color-foreground)]">
-            dark mode{" "}
-            <span className="text-xs text-[color:var(--color-text-faded)]">
-              {darkMode === "hidden" && "— auto-generated from your light colors"}
-              {darkMode === "preview" && "— preview"}
-              {darkMode === "customize" && "— click zones to customize"}
-            </span>
-          </span>
-          <div className="flex gap-2">
-            {darkMode === "hidden" && (
-              <>
-                <button
-                  onClick={() => setDarkMode("preview")}
-                  className="cursor-pointer rounded-[3px] border border-[color:var(--color-line-strong)] px-3 py-1.5 text-xs text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
-                >
-                  preview dark
-                </button>
-                <button
-                  onClick={() => setDarkMode("customize")}
-                  className="cursor-pointer rounded-[3px] border border-[color:var(--color-line-strong)] px-3 py-1.5 text-xs text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
-                >
-                  customize dark
-                </button>
-              </>
-            )}
-            {(darkMode === "preview" || darkMode === "customize") && (
-              <button
-                onClick={() => setDarkMode("hidden")}
-                className="cursor-pointer rounded-[3px] border border-[color:var(--color-line-strong)] px-3 py-1.5 text-xs text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
-              >
-                back to light
-              </button>
-            )}
-            {darkMode === "preview" && (
-              <button
-                onClick={() => setDarkMode("customize")}
-                className="cursor-pointer rounded-[3px] border border-[color:var(--color-line-strong)] px-3 py-1.5 text-xs text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
-              >
-                customize
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
