@@ -57,7 +57,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md" style={fontMono}>
           <div className="mb-6 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
             <h1 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
-              <span className="text-[color:var(--color-text-faded)] font-normal">// </span>
+              <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
               auth
             </h1>
             <p className="mt-2 text-sm text-[color:var(--color-text-dim)]">

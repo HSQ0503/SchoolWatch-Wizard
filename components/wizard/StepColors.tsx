@@ -11,24 +11,7 @@ type StepProps = {
   onChange: (data: WizardFormData) => void;
 };
 
-const inputClass =
-  "w-full rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] transition-colors focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)]";
-
-const labelClass =
-  "block text-xs text-[color:var(--color-text-faded)] mb-1.5";
-
 const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
-
-const ZONE_LABELS: Record<keyof ZoneColors, string> = {
-  navbar: "Navbar",
-  navText: "Nav Text",
-  background: "Background",
-  heading: "Heading",
-  ring: "Timer Ring",
-  surface: "Card Surface",
-  cardAccent: "Card Accent",
-  badge: "Badge",
-};
 
 
 export default function StepColors({ data, onChange }: StepProps) {

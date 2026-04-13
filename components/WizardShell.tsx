@@ -128,6 +128,7 @@ export default function WizardShell({ steps, initialData, schoolId }: WizardShel
     console.log(`[WizardShell] Step changed to ${currentStep} ("${STEPS[currentStep]}")`);
     console.log(`[WizardShell] Component:`, StepComponent?.name || StepComponent || "UNDEFINED");
     console.log(`[WizardShell] Form data snapshot:`, JSON.parse(JSON.stringify(data)));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowErrors(false);
     setErrors([]);
   }, [currentStep]); // eslint-disable-line react-hooks/exhaustive-deps

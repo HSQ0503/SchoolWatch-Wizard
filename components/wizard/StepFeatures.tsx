@@ -33,7 +33,7 @@ export default function StepFeatures({ data, onChange }: StepProps) {
     <div className="space-y-6" style={fontMono}>
       <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
         <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
-          <span className="text-[color:var(--color-text-faded)] font-normal">// </span>
+          <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
           features
         </h2>
         <span className="text-[12px] text-[color:var(--color-text-faded)]">

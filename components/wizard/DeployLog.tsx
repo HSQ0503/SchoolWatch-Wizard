@@ -78,6 +78,7 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
   // Append stage lines as state advances.
   useEffect(() => {
     if (state === "idle") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEntries([]);
       return;
     }
@@ -90,6 +91,7 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
   // Append URL line when done.
   useEffect(() => {
     if (state === "done" && url) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEntries((prev) => [
         ...prev,
         { t: "      ", kind: "info", text: `→ ${url}` },
@@ -100,6 +102,7 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
   // Append error line.
   useEffect(() => {
     if (state === "error") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEntries((prev) => [
         ...prev,
         { t: "  --  ", kind: "err", text: error ?? "deployment failed" },
