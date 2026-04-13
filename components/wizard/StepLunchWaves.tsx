@@ -7,23 +7,34 @@ type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => voi
 
 type WaveOption = { id: string; label: string };
 
-const inputClass =
-  "w-full rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] transition-colors focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)]";
-
-const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+// Zine step-body primitives (shared visual language used by all 7 steps).
+const kickerCls =
+  "mb-3 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-ink-faded)]";
+const headlineCls =
+  "font-[900] leading-[0.95] tracking-[-0.02em] text-[color:var(--color-ink)]";
+const subcopyCls =
+  "mt-4 text-[15px] leading-[1.55] text-[color:var(--color-ink-soft)]";
+const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const headlineFont: React.CSSProperties = {
+  fontFamily: "var(--font-archivo)",
+  fontSize: "clamp(32px, 4.2vw, 52px)",
+};
+const italicAccent: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontStyle: "italic",
+  fontWeight: 400,
+  letterSpacing: "-0.01em",
+};
+const subcopyFont: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  maxWidth: "52ch",
+};
+const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 const DEFAULT_WAVES: WaveOption[] = [
   { id: "wave-1", label: "Wave 1" },
   { id: "wave-2", label: "Wave 2" },
 ];
-
-function TrashIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-    </svg>
-  );
-}
 
 export default function StepLunchWaves({ data, onChange }: StepProps) {
   const { enabled, options, default: defaultWave } = data.lunchWaves;
@@ -57,98 +68,131 @@ export default function StepLunchWaves({ data, onChange }: StepProps) {
   }
 
   return (
-    <div className="space-y-6" style={fontMono}>
-      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
-        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
-          <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
-          lunch_waves
-        </h2>
-        <span className="text-[12px] text-[color:var(--color-text-faded)]">
-          — does your school split lunch into staggered waves?
-        </span>
-      </div>
+    <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div>
+        <p className={kickerCls} style={kickerFont}>step 04 / lunch waves</p>
+        <h1 className={headlineCls} style={headlineFont}>
+          Split <span style={italicAccent}>lunch</span> by wave?
+        </h1>
+        <p className={subcopyCls} style={subcopyFont}>
+          Some schools run multiple lunch rotations to fit everyone. If yours does, turn this on and name each wave. If lunch is one shared period, leave it off and skip this step.
+        </p>
 
-      {/* Toggle */}
-      <button
-        onClick={toggleEnabled}
-        aria-pressed={enabled}
-        className={`flex w-full cursor-pointer items-center justify-between rounded-[3px] border px-5 py-4 text-left text-sm transition-colors ${
-          enabled
-            ? "border-[color:var(--color-accent)] bg-[rgba(255,99,99,0.08)] text-[color:var(--color-foreground)]"
-            : "border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)]"
-        }`}
-        style={fontMono}
-      >
-        <span className="font-semibold">
-          {enabled ? "● lunch waves enabled" : "○ no lunch waves"}
-        </span>
-        <span className="text-xs uppercase tracking-[0.12em] text-[color:var(--color-text-faded)]">
-          [click to toggle]
-        </span>
-      </button>
+        {/* Enable toggle — InkCheckboxCard pattern */}
+        <button
+          type="button"
+          onClick={toggleEnabled}
+          className="mt-10 flex w-full items-center gap-5 border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] p-5 text-left transition-colors hover:bg-[color:var(--color-ink)]/5"
+        >
+          <span
+            className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-[color:var(--color-ink)]"
+            style={{ background: enabled ? "var(--highlight)" : "transparent" }}
+          >
+            {enabled && (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8.5L6.5 12L13 4" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </span>
+          <div>
+            <p className="text-[17px] font-semibold text-[color:var(--color-ink)]" style={{ fontFamily: "var(--font-archivo)" }}>Use lunch waves</p>
+            <p className="text-[14px] italic text-[color:var(--color-ink-soft)]" style={{ fontFamily: "var(--font-display)" }}>Some schools split lunch across multiple rotations. Enable this if yours does.</p>
+          </div>
+        </button>
 
-      {enabled && (
-        <div className="space-y-4">
-          <div className="space-y-2">
+        {/* Wave list */}
+        {enabled && (
+          <div className="mt-8 space-y-5">
             {options.map((wave, i) => (
-              <div key={wave.id} className="flex items-center gap-2">
-                <input
-                  className="w-32 shrink-0 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] focus:border-[color:var(--color-accent)] focus:outline-none"
-                  style={fontMono}
-                  type="text"
-                  placeholder="wave-1"
-                  value={wave.id}
-                  onChange={(e) => {
-                    const newId = e.target.value;
-                    const newOptions = options.map((w, j) => (j === i ? { ...w, id: newId } : w));
-                    const newDefault = defaultWave === wave.id ? newId : defaultWave;
-                    updateLunchWaves({ options: newOptions, default: newDefault });
-                  }}
-                  aria-label={`Wave ${i + 1} ID`}
-                />
-                <input
-                  className={inputClass}
-                  type="text"
-                  placeholder="Wave label"
-                  value={wave.label}
-                  onChange={(e) => updateWave(i, { label: e.target.value })}
-                  aria-label={`Wave ${i + 1} label`}
-                />
-                <button
-                  onClick={() => updateLunchWaves({ default: wave.id })}
-                  aria-pressed={defaultWave === wave.id}
-                  className={`shrink-0 cursor-pointer rounded-[3px] border px-2.5 py-1.5 text-[11px] ${
-                    defaultWave === wave.id
-                      ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-black font-bold"
-                      : "border-[color:var(--color-line-strong)] text-[color:var(--color-text-faded)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
-                  }`}
-                  style={fontMono}
-                >
-                  default
-                </button>
-                <button
-                  onClick={() => removeWave(i)}
-                  aria-label={`Remove wave ${i + 1}`}
-                  className="cursor-pointer shrink-0 rounded-[3px] p-1.5 text-[color:var(--color-text-faded)] hover:bg-[color:var(--color-bg-input)] hover:text-[color:var(--color-accent)]"
-                >
-                  <TrashIcon />
-                </button>
+              <div
+                key={wave.id}
+                className="border-l-[3px] border-[color:var(--color-ink)] py-3 pl-5"
+              >
+                {/* Header row: label input + id input + default radio + remove */}
+                <div className="flex items-center gap-3">
+                  <input
+                    aria-label="Wave name"
+                    className="flex-1 border-0 border-b-[1.5px] border-[color:var(--color-ink)] bg-transparent py-2 text-[20px] text-[color:var(--color-ink)] focus:border-[color:var(--color-marker)] focus:outline-none"
+                    style={{ fontFamily: "var(--font-archivo)" }}
+                    placeholder="Wave label"
+                    value={wave.label}
+                    onChange={(e) => updateWave(i, { label: e.target.value })}
+                  />
+                  <input
+                    aria-label="Wave ID"
+                    className="w-28 border-0 border-b-[1.5px] border-[color:var(--color-ink)] bg-transparent py-2 text-[13px] text-[color:var(--color-ink-soft)] focus:border-[color:var(--color-marker)] focus:outline-none"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                    placeholder="wave-id"
+                    value={wave.id}
+                    onChange={(e) => {
+                      const newId = e.target.value;
+                      const newOptions = options.map((w, j) => (j === i ? { ...w, id: newId } : w));
+                      const newDefault = defaultWave === wave.id ? newId : defaultWave;
+                      updateLunchWaves({ options: newOptions, default: newDefault });
+                    }}
+                  />
+                  <label
+                    className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink-faded)]"
+                    style={labelFont}
+                  >
+                    <input
+                      type="radio"
+                      name="default-wave"
+                      checked={defaultWave === wave.id}
+                      onChange={() => updateLunchWaves({ default: wave.id })}
+                      className="accent-[color:var(--color-marker)]"
+                    />
+                    default
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => removeWave(i)}
+                    className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink-faded)] underline underline-offset-4 hover:text-[color:var(--color-marker)]"
+                    style={labelFont}
+                  >
+                    remove
+                  </button>
+                </div>
               </div>
             ))}
+
+            {/* Add wave */}
+            <button
+              type="button"
+              onClick={addWave}
+              className="mt-6 text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] underline underline-offset-4 decoration-[1.5px] transition-colors hover:text-[color:var(--color-marker)] hover:[text-decoration-style:wavy]"
+              style={labelFont}
+            >
+              + add wave
+            </button>
           </div>
+        )}
+      </div>
 
-          <button
-            onClick={addWave}
-            className="cursor-pointer text-xs uppercase tracking-[0.12em] text-[color:var(--color-accent)] hover:brightness-110"
+      {/* Right-rail margin note */}
+      <aside className="order-first lg:order-last lg:pt-24" aria-label="Tip">
+        <div className="relative border-l-[3px] border-[color:var(--color-ink)] pl-5">
+          <span
+            aria-hidden="true"
+            className="absolute -left-8 -top-1 leading-none"
+            style={{
+              fontFamily: "var(--font-caveat)",
+              fontWeight: 700,
+              fontSize: 28,
+              color: "var(--marker)",
+              transform: "rotate(-6deg)",
+            }}
           >
-            [+] add lunch wave
-          </button>
-
-          <p className="rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-4 py-3 text-[11px] leading-relaxed text-[color:var(--color-text-faded)]">
-            <span className="text-[color:var(--color-text-dim)] font-bold">tip:</span> after adding waves, go back to <span className="text-[color:var(--color-accent)]">schedule</span> to set per-wave lunch periods.
+            4
+          </span>
+          <p
+            className="text-[15px] italic leading-[1.5] text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Most schools don&apos;t need this. If lunch is one shared period for everyone, leave the toggle off and skip ahead.
           </p>
         </div>
-      )}
+      </aside>
     </div>
   );
 }
