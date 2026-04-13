@@ -2,11 +2,34 @@
 
 import { useState } from "react";
 import type { WizardFormData } from "@/lib/types";
-import DeployLog, { type DeployState } from "@/components/wizard/DeployLog";
+import DeployProgress, { type DeployState } from "@/components/DeployProgress";
+import ConfigPreview from "@/components/wizard/ConfigPreview";
+import { defaultLightColors } from "@/lib/colors";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void; schoolId?: string };
 
-const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+// ── zine step-body constants (cross-step parity) ────────────────────────────
+const kickerCls =
+  "text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
+const headlineCls =
+  "mt-2 text-[2.25rem] leading-[1.1] font-bold text-[color:var(--color-ink)]";
+const subcopyCls = "mt-3 text-[15px] leading-relaxed text-[color:var(--color-ink-soft)]";
+const labelCls =
+  "text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-ink-faded)]";
+
+const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const headlineFont: React.CSSProperties = { fontFamily: "var(--font-display)" };
+const italicAccent: React.CSSProperties = {
+  fontStyle: "italic",
+  fontFamily: "var(--font-display)",
+};
+const subcopyFont: React.CSSProperties = { fontFamily: "var(--font-display)" };
+const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+
+// suppress unused warnings for cross-step parity
+void kickerFont;
+void italicAccent;
+void subcopyFont;
 
 export default function StepReview({ data, schoolId }: StepProps) {
   const isEditMode = !!schoolId;
@@ -57,130 +80,273 @@ export default function StepReview({ data, schoolId }: StepProps) {
     }
   }
 
+  // Count zones whose value differs from the auto-derived defaults
+  const derivedDefaults = defaultLightColors(
+    data.colors.primary || "#000000",
+    data.colors.accent || "#000000"
+  );
+  const overriddenCount = (
+    Object.keys(derivedDefaults) as (keyof typeof derivedDefaults)[]
+  ).filter((zone) => data.colors.light[zone] !== derivedDefaults[zone]).length;
+
   const { school, schedule, calendar, features, contactEmail } = data;
   const cityState = [school.city, school.stateCode].filter(Boolean).join(", ");
-  const dayTypeCount = schedule.dayTypes.length;
-  const lunchWaveCount = data.lunchWaves.options.length;
 
   return (
-    <div className="space-y-8" style={fontMono}>
-      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
-        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
-          <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
-          {isEditMode ? "review_and_save" : "review_and_deploy"}
-        </h2>
-        <span className="text-[12px] text-[color:var(--color-text-faded)]">
-          — sanity check, then ship.
-        </span>
-      </div>
+    <div>
+      {/* Header */}
+      <p className={kickerCls} style={kickerFont}>
+        step 07 / review &amp; deploy
+      </p>
+      <h1 className={headlineCls} style={headlineFont}>
+        <span style={italicAccent}>One more</span> look.
+      </h1>
+      <p className={subcopyCls} style={subcopyFont}>
+        If everything below looks right, hit {isEditMode ? "Redeploy" : "Deploy"}. We&rsquo;ll
+        create the repo, wire up Vercel, and email you a magic link in about a minute.
+      </p>
 
-      <div className="grid gap-4">
-        <ReviewBlock title="school">
-          <Row k="name" v={school.name} />
-          <Row k="mascot" v={school.mascot} />
-          <Row k="app_name" v={school.appName} />
-          <Row k="year" v={school.academicYear} />
-          {cityState && <Row k="location" v={cityState} />}
-        </ReviewBlock>
-
-        <ReviewBlock title="colors">
-          <Row k="primary" v={data.colors.primary} swatch={data.colors.primary} />
-          <Row k="accent" v={data.colors.accent} swatch={data.colors.accent} />
-        </ReviewBlock>
-
-        <ReviewBlock title="schedule">
-          <Row k="day_types" v={`${dayTypeCount}`} />
-          <Row k="lunch_waves" v={`${lunchWaveCount}`} />
-        </ReviewBlock>
-
-        <ReviewBlock title="calendar">
-          <Row k="no_school" v={`${calendar.noSchoolDates.length}`} />
-          <Row k="events" v={`${calendar.events.length}`} />
-        </ReviewBlock>
-
-        <ReviewBlock title="features">
-          <Row k="events_calendar" v={features.events ? "enabled" : "disabled"} />
-          <Row k="productivity" v={features.productivity ? "enabled" : "disabled"} />
-        </ReviewBlock>
-
-        <ReviewBlock title="contact">
-          <Row k="email" v={contactEmail} />
-        </ReviewBlock>
-      </div>
-
-      <button
-        onClick={handleDeploy}
-        disabled={!canDeploy || isDeploying}
-        className="w-full cursor-pointer rounded-[3px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-6 py-4 text-center text-sm font-bold uppercase tracking-[0.08em] text-black transition-[filter] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-        style={fontMono}
-      >
-        {isDeploying
-          ? isEditMode
-            ? "./redeploy — running..."
-            : "./deploy — running..."
-          : isEditMode
-          ? "./redeploy →"
-          : "./deploy →"}
-      </button>
-
-      {!canDeploy && (
-        <p className="text-center text-[11px] text-[color:var(--color-text-faded)]">
-          school name and contact email are required to deploy.
+      {/* ── School ─────────────────────────────────────────────────────────── */}
+      <section className="mt-10">
+        <p className={labelCls} style={labelFont}>
+          School
         </p>
-      )}
+        <dl
+          className="mt-2 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Name</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.name || <em className="text-[color:var(--color-marker)]">missing</em>}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Short name</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.shortName || <em className="text-[color:var(--color-marker)]">—</em>}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Acronym</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.acronym || <em className="text-[color:var(--color-marker)]">—</em>}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Mascot</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.mascot || <em className="text-[color:var(--color-marker)]">—</em>}
+            </dd>
+          </div>
+          {cityState && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-[color:var(--color-ink-faded)]">City / State</dt>
+              <dd className="text-right italic text-[color:var(--color-ink)]">{cityState}</dd>
+            </div>
+          )}
+          {school.academicYear && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-[color:var(--color-ink-faded)]">Academic year</dt>
+              <dd className="text-right italic text-[color:var(--color-ink)]">
+                {school.academicYear}
+              </dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-4 sm:col-span-2">
+            <dt className="text-[color:var(--color-ink-faded)]">Contact email</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {contactEmail || (
+                <em className="text-[color:var(--color-marker)]">missing</em>
+              )}
+            </dd>
+          </div>
+        </dl>
+      </section>
 
-      <DeployLog
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Colors ─────────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Colors
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span
+              className="block h-8 w-8 border border-[color:var(--color-ink)]"
+              style={{ background: data.colors.primary }}
+            />
+            <span
+              className="text-[13px] text-[color:var(--color-ink)]"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {data.colors.primary.toUpperCase()}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className="block h-8 w-8 border border-[color:var(--color-ink)]"
+              style={{ background: data.colors.accent }}
+            />
+            <span
+              className="text-[13px] text-[color:var(--color-ink)]"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {data.colors.accent.toUpperCase()}
+            </span>
+          </div>
+          {overriddenCount > 0 && (
+            <span
+              className="text-[13px] italic text-[color:var(--color-ink-soft)]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              + {overriddenCount} zone{overriddenCount === 1 ? "" : "s"} overridden
+            </span>
+          )}
+        </div>
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Schedule ───────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Schedule
+        </p>
+        <ul
+          className="mt-3 space-y-1 text-[15px] italic text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {schedule.dayTypes.map((dt) => {
+            const bells = schedule.bells[dt.id];
+            const sharedCount = bells?.shared.length ?? 0;
+            const afterCount = bells?.after?.length ?? 0;
+            return (
+              <li key={dt.id}>
+                <span className="text-[color:var(--color-ink)]">{dt.label}</span> —{" "}
+                {sharedCount} period{sharedCount === 1 ? "" : "s"}
+                {afterCount > 0 &&
+                  `, ${afterCount} after-school event${afterCount === 1 ? "" : "s"}`}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Lunch waves ────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Lunch waves
+        </p>
+        {!data.lunchWaves.enabled ? (
+          <p
+            className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Disabled — lunch is one shared period for everyone.
+          </p>
+        ) : (
+          <p
+            className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {data.lunchWaves.options.map((w) => w.label).join(", ")}
+            {data.lunchWaves.default && (
+              <span className="text-[color:var(--color-ink-faded)]">
+                {" "}
+                · default:{" "}
+                {data.lunchWaves.options.find((w) => w.id === data.lunchWaves.default)
+                  ?.label ?? "?"}
+              </span>
+            )}
+          </p>
+        )}
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Calendar ───────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Calendar
+        </p>
+        <p
+          className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {calendar.noSchoolDates.length} no-school day
+          {calendar.noSchoolDates.length === 1 ? "" : "s"},{" "}
+          {calendar.earlyDismissalDates.length} early dismissal
+          {calendar.earlyDismissalDates.length === 1 ? "" : "s"},{" "}
+          {calendar.events.length} event{calendar.events.length === 1 ? "" : "s"}
+        </p>
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Features ───────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Features
+        </p>
+        <p
+          className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {Object.entries(features)
+            .filter(([, enabled]) => enabled)
+            .map(([key]) => key)
+            .join(", ") || "None enabled"}
+        </p>
+      </section>
+
+      {/* ── Generated config disclosure ────────────────────────────────────── */}
+      <details className="mt-10 group">
+        <summary
+          className="inline-flex cursor-pointer list-none items-center gap-2 border border-[color:var(--color-ink)] px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
+          view generated config
+          <span className="transition-transform group-open:rotate-180">↓</span>
+        </summary>
+        <ConfigPreview data={data} />
+      </details>
+
+      {/* ── Deploy CTA ─────────────────────────────────────────────────────── */}
+      <div className="mt-10">
+        <button
+          type="button"
+          onClick={handleDeploy}
+          disabled={!canDeploy || isDeploying}
+          className="group inline-flex w-full items-center justify-center gap-2.5 border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-7 py-4 text-[color:var(--color-paper)] shadow-[6px_6px_0_var(--highlight)] transition-[transform,box-shadow] duration-150 hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[3px_3px_0_var(--highlight)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-[0_0_0_var(--highlight)] disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+          style={{ fontFamily: "var(--font-archivo)", fontSize: 16 }}
+        >
+          {isEditMode ? "Redeploy" : "Deploy"}
+          <span className="text-[22px] leading-[0] transition-transform group-hover:translate-x-1">
+            →
+          </span>
+        </button>
+
+        {!canDeploy && (
+          <p
+            className="mt-3 text-[13px] text-[color:var(--color-ink-faded)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            School name and contact email are required to deploy.
+          </p>
+        )}
+      </div>
+
+      {/* ── Deploy log ─────────────────────────────────────────────────────── */}
+      <DeployProgress
         state={deployState}
         url={deployUrl}
         error={deployError}
         isEditMode={isEditMode}
       />
     </div>
-  );
-}
-
-function ReviewBlock({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] p-4">
-      <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-faded)]">
-        <span>{title}</span>
-      </div>
-      <dl className="grid grid-cols-[130px_1fr] gap-x-3 gap-y-1.5 text-[12px]">
-        {children}
-      </dl>
-    </div>
-  );
-}
-
-function Row({
-  k,
-  v,
-  swatch,
-}: {
-  k: string;
-  v: string | number;
-  swatch?: string;
-}) {
-  return (
-    <>
-      <dt className="text-[color:var(--color-text-faded)]" style={{ fontFamily: "var(--font-mono)" }}>
-        {k}
-      </dt>
-      <dd className="flex items-center gap-2 text-[color:var(--color-foreground)]" style={{ fontFamily: "var(--font-mono)" }}>
-        {swatch && (
-          <span
-            className="inline-block h-2.5 w-2.5 border border-white/10"
-            style={{ background: swatch }}
-          />
-        )}
-        {v || "—"}
-      </dd>
-    </>
   );
 }
