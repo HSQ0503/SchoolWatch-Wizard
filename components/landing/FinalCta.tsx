@@ -1,54 +1,64 @@
-"use client";
-
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
-import Arrow from "./Arrow";
-import Reveal from "./Reveal";
-import SectionDivider from "./SectionDivider";
 
+// Source: homepage-zine.html — section.final (flips to black paper, candy stripe top)
 export default function FinalCta() {
-  const shouldReduce = useReducedMotion();
-
   return (
     <section
       aria-label="Get started"
-      className="relative flex min-h-[65vh] items-center justify-center px-6 py-40"
-      style={{
-        background:
-          "linear-gradient(180deg, #0a0a0a 0%, #0b0b0e 50%, #0a0a0a 100%)",
-      }}
+      className="relative mt-10 px-8 py-40 text-center text-[color:var(--color-paper)]"
+      style={{ background: "var(--ink)" }}
     >
-      <SectionDivider />
-      <Reveal>
-        <div className="mx-auto max-w-2xl text-center">
-          <h2
-            className="text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-white md:text-6xl font-[family-name:var(--font-display)]"
-            style={{ fontVariationSettings: '"opsz" 144' }}
+      {/* Candy-stripe top edge */}
+      <span
+        aria-hidden="true"
+        className="absolute left-0 right-0 top-0 h-3"
+        style={{
+          background:
+            "repeating-linear-gradient(135deg, var(--highlight) 0 20px, transparent 20px 40px), var(--marker)",
+        }}
+      />
+      <div className="mx-auto max-w-[768px]">
+        <h2
+          className="text-[color:var(--color-paper)] font-[900] leading-[0.92] tracking-[-0.04em]"
+          style={{ fontFamily: "var(--font-archivo)", fontSize: "clamp(56px, 9vw, 120px)" }}
+        >
+          You&apos;re still{" "}
+          <span
+            className="inline-block bg-[color:var(--highlight)] px-3 text-[color:var(--color-ink)]"
+            style={{
+              boxDecorationBreak: "clone",
+              WebkitBoxDecorationBreak: "clone",
+            }}
           >
-            You&apos;re still reading.
-            <br />
-            <span className="text-[color:var(--color-body)]">Go build it.</span>
-          </h2>
-          <div className="relative mt-12 inline-block">
-            {/* Ambient pulsing glow behind the button */}
-            <motion.div
-              aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-1/2 h-14 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[color:var(--color-accent)] opacity-20 blur-2xl"
-              animate={shouldReduce ? undefined : { opacity: [0.2, 0.35, 0.2] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <Link
-              href="/setup"
-              className="group relative inline-flex items-center gap-2 rounded-lg bg-[color:var(--color-accent)] px-8 py-4 text-base font-semibold text-black transition-[filter] duration-150 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-accent)] focus-visible:outline-offset-2"
-            >
-              Start Yours <Arrow />
-            </Link>
-          </div>
-          <p className="mt-6 text-sm text-[color:var(--color-body)]">
-            Five minutes. No signup. Live when you&apos;re done.
-          </p>
+            reading.
+          </span>
+        </h2>
+        <p
+          className="mt-6 text-[color:var(--color-paper)]/80"
+          style={{ fontFamily: "var(--font-display)", fontSize: 19 }}
+        >
+          Go build it. Five minutes. No signup. Live when you&apos;re done.
+        </p>
+
+        <Link
+          href="/setup"
+          className="mt-10 inline-flex items-center gap-3.5 border-[3px] border-[color:var(--color-paper)] bg-[color:var(--highlight)] px-10 py-5 text-[color:var(--color-ink)]"
+          style={{
+            fontFamily: "var(--font-archivo)",
+            fontSize: 20,
+            boxShadow: "8px 8px 0 var(--marker)",
+          }}
+        >
+          Start Yours →
+        </Link>
+
+        <div
+          className="mt-8 inline-block -rotate-2 rounded border-2 border-dashed border-[color:var(--highlight)] px-5 py-2.5 text-[color:var(--highlight)]"
+          style={{ fontFamily: "var(--font-caveat)", fontWeight: 700, fontSize: 22 }}
+        >
+          open source · MIT · made at WPS
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }
