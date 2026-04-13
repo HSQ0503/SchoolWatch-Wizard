@@ -14,6 +14,9 @@ const headlineCls =
   "font-[900] leading-[0.95] tracking-[-0.02em] text-[color:var(--color-ink)]";
 const subcopyCls =
   "mt-4 text-[15px] leading-[1.55] text-[color:var(--color-ink-soft)]";
+const labelCls =
+  "mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
+void labelCls;
 const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const headlineFont: React.CSSProperties = {
   fontFamily: "var(--font-archivo)",
