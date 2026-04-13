@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import type { WizardFormData } from "@/lib/types";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
@@ -7,7 +8,9 @@ type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => voi
 type WaveOption = { id: string; label: string };
 
 const inputClass =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150";
+  "w-full rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] transition-colors focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)]";
+
+const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 const DEFAULT_WAVES: WaveOption[] = [
   { id: "wave-1", label: "Wave 1" },
@@ -54,46 +57,44 @@ export default function StepLunchWaves({ data, onChange }: StepProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-white">Lunch Waves</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          Does your school split lunch into multiple waves (staggered lunch periods)?
-        </p>
+    <div className="space-y-6" style={fontMono}>
+      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
+        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
+          <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
+          lunch_waves
+        </h2>
+        <span className="text-[12px] text-[color:var(--color-text-faded)]">
+          — does your school split lunch into staggered waves?
+        </span>
       </div>
 
       {/* Toggle */}
       <button
         onClick={toggleEnabled}
         aria-pressed={enabled}
-        className={`cursor-pointer flex w-full items-center justify-between rounded-xl border-2 px-5 py-4 text-left transition-colors duration-150 ${
+        className={`flex w-full cursor-pointer items-center justify-between rounded-[3px] border px-5 py-4 text-left text-sm transition-colors ${
           enabled
-            ? "border-white bg-white/10 text-white"
-            : "border-white/20 text-gray-400 hover:border-white/30"
+            ? "border-[color:var(--color-accent)] bg-[rgba(255,99,99,0.08)] text-[color:var(--color-foreground)]"
+            : "border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)]"
         }`}
+        style={fontMono}
       >
-        <span className="text-sm font-semibold">Yes, we have lunch waves</span>
-        <span
-          className={`flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-            enabled ? "bg-white" : "bg-white/20"
-          }`}
-        >
-          <span
-            className={`h-4 w-4 rounded-full shadow transition-transform duration-200 ${
-              enabled ? "translate-x-6 bg-black" : "translate-x-1 bg-gray-400"
-            }`}
-          />
+        <span className="font-semibold">
+          {enabled ? "● lunch waves enabled" : "○ no lunch waves"}
+        </span>
+        <span className="text-xs uppercase tracking-[0.12em] text-[color:var(--color-text-faded)]">
+          [click to toggle]
         </span>
       </button>
 
-      {/* Wave options */}
       {enabled && (
         <div className="space-y-4">
           <div className="space-y-2">
             {options.map((wave, i) => (
-              <div key={wave.id} className="flex items-center gap-3">
+              <div key={wave.id} className="flex items-center gap-2">
                 <input
-                  className="w-32 shrink-0 rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white font-mono placeholder-gray-500 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150"
+                  className="w-32 shrink-0 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] focus:border-[color:var(--color-accent)] focus:outline-none"
+                  style={fontMono}
                   type="text"
                   placeholder="wave-1"
                   value={wave.id}
@@ -116,18 +117,19 @@ export default function StepLunchWaves({ data, onChange }: StepProps) {
                 <button
                   onClick={() => updateLunchWaves({ default: wave.id })}
                   aria-pressed={defaultWave === wave.id}
-                  className={`cursor-pointer shrink-0 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 ${
+                  className={`shrink-0 cursor-pointer rounded-[3px] border px-2.5 py-1.5 text-[11px] ${
                     defaultWave === wave.id
-                      ? "border-white bg-white text-black"
-                      : "border-white/20 text-gray-500 hover:text-white hover:border-white/40"
+                      ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-black font-bold"
+                      : "border-[color:var(--color-line-strong)] text-[color:var(--color-text-faded)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
                   }`}
+                  style={fontMono}
                 >
-                  Default
+                  default
                 </button>
                 <button
                   onClick={() => removeWave(i)}
                   aria-label={`Remove wave ${i + 1}`}
-                  className="cursor-pointer shrink-0 rounded-lg p-2 text-gray-600 transition-colors duration-150 hover:bg-white/5 hover:text-red-400"
+                  className="cursor-pointer shrink-0 rounded-[3px] p-1.5 text-[color:var(--color-text-faded)] hover:bg-[color:var(--color-bg-input)] hover:text-[color:var(--color-accent)]"
                 >
                   <TrashIcon />
                 </button>
@@ -137,13 +139,13 @@ export default function StepLunchWaves({ data, onChange }: StepProps) {
 
           <button
             onClick={addWave}
-            className="cursor-pointer rounded-lg border border-dashed border-white/20 px-4 py-2 text-sm text-gray-500 transition-colors duration-150 hover:border-white/30 hover:text-gray-300"
+            className="cursor-pointer text-xs uppercase tracking-[0.12em] text-[color:var(--color-accent)] hover:brightness-110"
           >
-            + Add Lunch Wave
+            [+] add lunch wave
           </button>
 
-          <p className="rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-xs text-gray-400 leading-relaxed">
-            <strong className="text-gray-300">Tip:</strong> After setting up waves, go back to the Schedule step to add lunch-specific periods for each wave.
+          <p className="rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-4 py-3 text-[11px] leading-relaxed text-[color:var(--color-text-faded)]">
+            <span className="text-[color:var(--color-text-dim)] font-bold">tip:</span> after adding waves, go back to <span className="text-[color:var(--color-accent)]">schedule</span> to set per-wave lunch periods.
           </p>
         </div>
       )}

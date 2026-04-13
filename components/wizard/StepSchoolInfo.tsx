@@ -6,9 +6,12 @@ import type { WizardFormData } from "@/lib/types";
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
 const inputClass =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150";
+  "w-full rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] px-3 py-2 text-[13px] text-[color:var(--color-foreground)] placeholder-[color:var(--color-text-faded)] transition-colors focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent)]";
 
-const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
+const labelClass =
+  "block text-xs text-[color:var(--color-text-faded)] mb-1.5";
+
+const fontMono: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 export default function StepSchoolInfo({ data, onChange }: StepProps) {
   const school = data.school;
@@ -72,188 +75,187 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-xl font-semibold text-white">School Information</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          Basic details about your school. Short name, acronym, and app name auto-fill as you type.
-        </p>
+    <div className="space-y-8" style={fontMono}>
+      <div className="flex items-baseline gap-3.5 border-b border-dashed border-[color:var(--color-line-strong)] pb-4">
+        <h2 className="text-[22px] font-bold text-[color:var(--color-foreground)]">
+          <span className="text-[color:var(--color-text-faded)] font-normal">{"// "}</span>
+          school_info
+        </h2>
+        <span className="text-[12px] text-[color:var(--color-text-faded)]">
+          — who are you building this for?
+        </span>
       </div>
 
       {/* Identity */}
-      <div className="space-y-4">
-        <div>
-          <label className={labelClass}>School Name (full)</label>
+      <div className="divide-y divide-[color:var(--color-line)]">
+        <div className="grid grid-cols-[180px_1fr] items-start gap-4 py-2.5">
+          <div className={labelClass}>name <span className="text-[color:var(--color-accent)]">*</span></div>
+          <div>
+            <input
+              ref={nameRef}
+              className={inputClass}
+              type="text"
+              placeholder="Windermere Preparatory School"
+              value={school.name}
+              onChange={(e) => handleNameChange(e.target.value)}
+            />
+            <p className="mt-1.5 text-[11px] text-[color:var(--color-text-faded)]">
+              Full legal name. Auto-fills short_name, acronym, and app_name.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>short_name</div>
           <input
-            ref={nameRef}
             className={inputClass}
             type="text"
-            placeholder="Windermere Preparatory School"
-            value={school.name}
-            onChange={(e) => handleNameChange(e.target.value)}
+            placeholder="Windermere Prep"
+            value={school.shortName}
+            onChange={(e) => updateSchool({ shortName: e.target.value })}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>Short Name</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="Windermere Prep"
-              value={school.shortName}
-              onChange={(e) => updateSchool({ shortName: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Acronym</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="WPS"
-              maxLength={4}
-              value={school.acronym}
-              onChange={(e) => updateSchool({ acronym: e.target.value.toUpperCase() })}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>Mascot</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="Lakers"
-              value={school.mascot}
-              onChange={(e) => updateSchool({ mascot: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>App Name</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="LakerWatch"
-              value={school.appName}
-              onChange={(e) => updateSchool({ appName: e.target.value })}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Logo */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Logo</h3>
-        <div className="flex items-center gap-5">
-          {data.logo ? (
-            <div className="relative shrink-0">
-              <img
-                src={data.logo}
-                alt="School logo preview"
-                className="h-16 w-16 rounded-lg object-contain border border-white/10 bg-white/5"
-              />
-              <button
-                onClick={removeLogo}
-                className="absolute -top-2 -right-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-400 transition-colors"
-                aria-label="Remove logo"
-              >
-                x
-              </button>
-            </div>
-          ) : (
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-dashed border-white/20 bg-white/5">
-              <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-              </svg>
-            </div>
-          )}
-          <div className="flex-1">
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/png,image/jpeg,image/svg+xml,image/webp"
-              onChange={handleLogoUpload}
-              className="hidden"
-              id="logo-upload"
-            />
-            <label
-              htmlFor="logo-upload"
-              className="inline-block cursor-pointer rounded-lg border border-white/20 px-4 py-2 text-sm text-gray-300 transition-colors duration-150 hover:border-white/40 hover:text-white"
-            >
-              {data.logo ? "Change logo" : "Upload logo"}
-            </label>
-            <p className="mt-1.5 text-xs text-gray-500">PNG, JPG, SVG, or WebP. Max 2MB.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Location */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>City</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="Orlando"
-              value={school.city}
-              onChange={(e) => updateSchool({ city: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>State</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="Florida"
-              value={school.state}
-              onChange={(e) => updateSchool({ state: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>State Code</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="FL"
-              maxLength={2}
-              value={school.stateCode}
-              onChange={(e) => updateSchool({ stateCode: e.target.value.toUpperCase() })}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Academic Year</label>
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="2025-2026"
-              value={school.academicYear}
-              onChange={(e) => updateSchool({ academicYear: e.target.value })}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Contact */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</h3>
-        <div>
-          <label className={labelClass}>Contact Email</label>
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>acronym</div>
           <input
             className={inputClass}
-            type="email"
-            placeholder="admin@school.edu"
-            value={data.contactEmail}
-            onChange={(e) => onChange({ ...data, contactEmail: e.target.value })}
+            type="text"
+            placeholder="WPS"
+            maxLength={4}
+            value={school.acronym}
+            onChange={(e) => updateSchool({ acronym: e.target.value.toUpperCase() })}
           />
-          <p className="mt-2 text-xs text-gray-500">
-            Used for magic link login to edit your dashboard later.
-          </p>
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>mascot <span className="text-[color:var(--color-accent)]">*</span></div>
+          <input
+            className={inputClass}
+            type="text"
+            placeholder="Lakers"
+            value={school.mascot}
+            onChange={(e) => updateSchool({ mascot: e.target.value })}
+          />
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>app_name</div>
+          <input
+            className={inputClass}
+            type="text"
+            placeholder="LakerWatch"
+            value={school.appName}
+            onChange={(e) => updateSchool({ appName: e.target.value })}
+          />
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>city <span className="text-[color:var(--color-accent)]">*</span></div>
+          <input
+            className={inputClass}
+            type="text"
+            placeholder="Orlando"
+            value={school.city}
+            onChange={(e) => updateSchool({ city: e.target.value })}
+          />
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>state <span className="text-[color:var(--color-accent)]">*</span></div>
+          <input
+            className={inputClass}
+            type="text"
+            placeholder="Florida"
+            value={school.state}
+            onChange={(e) => updateSchool({ state: e.target.value })}
+          />
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>state_code <span className="text-[color:var(--color-accent)]">*</span></div>
+          <input
+            className={inputClass}
+            type="text"
+            placeholder="FL"
+            maxLength={2}
+            value={school.stateCode}
+            onChange={(e) => updateSchool({ stateCode: e.target.value.toUpperCase() })}
+          />
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-center gap-4 py-2.5">
+          <div className={labelClass}>academic_year <span className="text-[color:var(--color-accent)]">*</span></div>
+          <input
+            className={inputClass}
+            type="text"
+            placeholder="2025-2026"
+            value={school.academicYear}
+            onChange={(e) => updateSchool({ academicYear: e.target.value })}
+          />
+        </div>
+
+        <div className="grid grid-cols-[180px_1fr] items-start gap-4 py-2.5">
+          <div className={labelClass}>contact_email <span className="text-[color:var(--color-accent)]">*</span></div>
+          <div>
+            <input
+              className={inputClass}
+              type="email"
+              placeholder="admin@school.edu"
+              value={data.contactEmail}
+              onChange={(e) => onChange({ ...data, contactEmail: e.target.value })}
+            />
+            <p className="mt-1.5 text-[11px] text-[color:var(--color-text-faded)]">
+              Used for the magic link we send after deploy. Not public.
+            </p>
+          </div>
+        </div>
+
+        {/* Logo — simplified, still binds to data.logo */}
+        <div className="grid grid-cols-[180px_1fr] items-start gap-4 py-2.5">
+          <div className={labelClass}>logo</div>
+          <div className="flex items-center gap-4">
+            {data.logo ? (
+              <div className="relative shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={data.logo}
+                  alt="School logo preview"
+                  className="h-14 w-14 rounded-[3px] border border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] object-contain"
+                />
+                <button
+                  onClick={removeLogo}
+                  className="absolute -top-2 -right-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-[color:var(--color-accent)] text-[10px] text-black hover:brightness-110"
+                  aria-label="Remove logo"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[3px] border border-dashed border-[color:var(--color-line-strong)] bg-[color:var(--color-bg-input)] text-[color:var(--color-text-faded)]">
+                ⟨img⟩
+              </div>
+            )}
+            <div className="flex-1">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                onChange={handleLogoUpload}
+                className="hidden"
+                id="logo-upload"
+              />
+              <label
+                htmlFor="logo-upload"
+                className="inline-block cursor-pointer rounded-[3px] border border-[color:var(--color-line-strong)] px-3 py-1.5 text-xs text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)]"
+              >
+                {data.logo ? "change logo" : "upload logo"}
+              </label>
+              <p className="mt-1.5 text-[11px] text-[color:var(--color-text-faded)]">
+                png, jpg, svg, or webp · max 2MB
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
