@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { WizardFormData } from "@/lib/types";
-import DeployProgress, { type DeployState } from "@/components/DeployProgress";
+import DeployLog, { type DeployState } from "@/components/wizard/DeployLog";
 import ConfigPreview from "@/components/wizard/ConfigPreview";
 import { defaultLightColors } from "@/lib/colors";
 
@@ -341,7 +341,7 @@ export default function StepReview({ data, schoolId }: StepProps) {
       </div>
 
       {/* ── Deploy log ─────────────────────────────────────────────────────── */}
-      <DeployProgress
+      <DeployLog
         state={deployState}
         url={deployUrl}
         error={deployError}
