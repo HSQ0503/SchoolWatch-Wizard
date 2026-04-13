@@ -3,23 +3,33 @@
 import { useState } from "react";
 import type { WizardFormData } from "@/lib/types";
 import DeployProgress, { type DeployState } from "@/components/DeployProgress";
+import ConfigPreview from "@/components/wizard/ConfigPreview";
+import { defaultLightColors } from "@/lib/colors";
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void; schoolId?: string };
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{children}</p>
-  );
-}
+// ── zine step-body constants (cross-step parity) ────────────────────────────
+const kickerCls =
+  "text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
+const headlineCls =
+  "mt-2 text-[2.25rem] leading-[1.1] font-bold text-[color:var(--color-ink)]";
+const subcopyCls = "mt-3 text-[15px] leading-relaxed text-[color:var(--color-ink-soft)]";
+const labelCls =
+  "text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-ink-faded)]";
 
-function Row({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 py-1.5">
-      <span className="text-sm text-gray-400">{label}</span>
-      <span className="text-sm font-medium text-white text-right">{value || "—"}</span>
-    </div>
-  );
-}
+const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const headlineFont: React.CSSProperties = { fontFamily: "var(--font-display)" };
+const italicAccent: React.CSSProperties = {
+  fontStyle: "italic",
+  fontFamily: "var(--font-display)",
+};
+const subcopyFont: React.CSSProperties = { fontFamily: "var(--font-display)" };
+const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+
+// suppress unused warnings for cross-step parity
+void kickerFont;
+void italicAccent;
+void subcopyFont;
 
 export default function StepReview({ data, schoolId }: StepProps) {
   const isEditMode = !!schoolId;
@@ -70,73 +80,273 @@ export default function StepReview({ data, schoolId }: StepProps) {
     }
   }
 
+  // Count zones whose value differs from the auto-derived defaults
+  const derivedDefaults = defaultLightColors(
+    data.colors.primary || "#000000",
+    data.colors.accent || "#000000"
+  );
+  const overriddenCount = (
+    Object.keys(derivedDefaults) as (keyof typeof derivedDefaults)[]
+  ).filter((zone) => data.colors.light[zone] !== derivedDefaults[zone]).length;
+
   const { school, schedule, calendar, features, contactEmail } = data;
   const cityState = [school.city, school.stateCode].filter(Boolean).join(", ");
-  const dayTypeCount = schedule.dayTypes.length;
-  const lunchWaveCount = data.lunchWaves.options.length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-white">{isEditMode ? "Review & Save" : "Review & Deploy"}</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          {isEditMode ? "Double-check your changes, then save to redeploy." : "Double-check your configuration, then deploy."}
+    <div>
+      {/* Header */}
+      <p className={kickerCls} style={kickerFont}>
+        step 07 / review &amp; deploy
+      </p>
+      <h1 className={headlineCls} style={headlineFont}>
+        <span style={italicAccent}>One more</span> look.
+      </h1>
+      <p className={subcopyCls} style={subcopyFont}>
+        If everything below looks right, hit {isEditMode ? "Redeploy" : "Deploy"}. We&rsquo;ll
+        create the repo, wire up Vercel, and email you a magic link in about a minute.
+      </p>
+
+      {/* ── School ─────────────────────────────────────────────────────────── */}
+      <section className="mt-10">
+        <p className={labelCls} style={labelFont}>
+          School
         </p>
+        <dl
+          className="mt-2 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Name</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.name || <em className="text-[color:var(--color-marker)]">missing</em>}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Short name</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.shortName || <em className="text-[color:var(--color-marker)]">—</em>}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Acronym</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.acronym || <em className="text-[color:var(--color-marker)]">—</em>}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-[color:var(--color-ink-faded)]">Mascot</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {school.mascot || <em className="text-[color:var(--color-marker)]">—</em>}
+            </dd>
+          </div>
+          {cityState && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-[color:var(--color-ink-faded)]">City / State</dt>
+              <dd className="text-right italic text-[color:var(--color-ink)]">{cityState}</dd>
+            </div>
+          )}
+          {school.academicYear && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-[color:var(--color-ink-faded)]">Academic year</dt>
+              <dd className="text-right italic text-[color:var(--color-ink)]">
+                {school.academicYear}
+              </dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-4 sm:col-span-2">
+            <dt className="text-[color:var(--color-ink-faded)]">Contact email</dt>
+            <dd className="text-right italic text-[color:var(--color-ink)]">
+              {contactEmail || (
+                <em className="text-[color:var(--color-marker)]">missing</em>
+              )}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Colors ─────────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Colors
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span
+              className="block h-8 w-8 border border-[color:var(--color-ink)]"
+              style={{ background: data.colors.primary }}
+            />
+            <span
+              className="text-[13px] text-[color:var(--color-ink)]"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {data.colors.primary.toUpperCase()}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className="block h-8 w-8 border border-[color:var(--color-ink)]"
+              style={{ background: data.colors.accent }}
+            />
+            <span
+              className="text-[13px] text-[color:var(--color-ink)]"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {data.colors.accent.toUpperCase()}
+            </span>
+          </div>
+          {overriddenCount > 0 && (
+            <span
+              className="text-[13px] italic text-[color:var(--color-ink-soft)]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              + {overriddenCount} zone{overriddenCount === 1 ? "" : "s"} overridden
+            </span>
+          )}
+        </div>
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Schedule ───────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Schedule
+        </p>
+        <ul
+          className="mt-3 space-y-1 text-[15px] italic text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {schedule.dayTypes.map((dt) => {
+            const bells = schedule.bells[dt.id];
+            const sharedCount = bells?.shared.length ?? 0;
+            const afterCount = bells?.after?.length ?? 0;
+            return (
+              <li key={dt.id}>
+                <span className="text-[color:var(--color-ink)]">{dt.label}</span> —{" "}
+                {sharedCount} period{sharedCount === 1 ? "" : "s"}
+                {afterCount > 0 &&
+                  `, ${afterCount} after-school event${afterCount === 1 ? "" : "s"}`}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Lunch waves ────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Lunch waves
+        </p>
+        {!data.lunchWaves.enabled ? (
+          <p
+            className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Disabled — lunch is one shared period for everyone.
+          </p>
+        ) : (
+          <p
+            className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {data.lunchWaves.options.map((w) => w.label).join(", ")}
+            {data.lunchWaves.default && (
+              <span className="text-[color:var(--color-ink-faded)]">
+                {" "}
+                · default:{" "}
+                {data.lunchWaves.options.find((w) => w.id === data.lunchWaves.default)
+                  ?.label ?? "?"}
+              </span>
+            )}
+          </p>
+        )}
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Calendar ───────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Calendar
+        </p>
+        <p
+          className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {calendar.noSchoolDates.length} no-school day
+          {calendar.noSchoolDates.length === 1 ? "" : "s"},{" "}
+          {calendar.earlyDismissalDates.length} early dismissal
+          {calendar.earlyDismissalDates.length === 1 ? "" : "s"},{" "}
+          {calendar.events.length} event{calendar.events.length === 1 ? "" : "s"}
+        </p>
+      </section>
+
+      <hr className="my-8 border-0 border-t border-dashed border-[color:var(--color-hairline)]" />
+
+      {/* ── Features ───────────────────────────────────────────────────────── */}
+      <section>
+        <p className={labelCls} style={labelFont}>
+          Features
+        </p>
+        <p
+          className="mt-2 text-[15px] italic text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {Object.entries(features)
+            .filter(([, enabled]) => enabled)
+            .map(([key]) => key)
+            .join(", ") || "None enabled"}
+        </p>
+      </section>
+
+      {/* ── Generated config disclosure ────────────────────────────────────── */}
+      <details className="mt-10 group">
+        <summary
+          className="inline-flex cursor-pointer list-none items-center gap-2 border border-[color:var(--color-ink)] px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
+          view generated config
+          <span className="transition-transform group-open:rotate-180">↓</span>
+        </summary>
+        <ConfigPreview data={data} />
+      </details>
+
+      {/* ── Deploy CTA ─────────────────────────────────────────────────────── */}
+      <div className="mt-10">
+        <button
+          type="button"
+          onClick={handleDeploy}
+          disabled={!canDeploy || isDeploying}
+          className="group inline-flex w-full items-center justify-center gap-2.5 border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-7 py-4 text-[color:var(--color-paper)] shadow-[6px_6px_0_var(--highlight)] transition-[transform,box-shadow] duration-150 hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[3px_3px_0_var(--highlight)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-[0_0_0_var(--highlight)] disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+          style={{ fontFamily: "var(--font-archivo)", fontSize: 16 }}
+        >
+          {isEditMode ? "Redeploy" : "Deploy"}
+          <span className="text-[22px] leading-[0] transition-transform group-hover:translate-x-1">
+            →
+          </span>
+        </button>
+
+        {!canDeploy && (
+          <p
+            className="mt-3 text-[13px] text-[color:var(--color-ink-faded)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            School name and contact email are required to deploy.
+          </p>
+        )}
       </div>
 
-      {/* Summary card */}
-      <div className="rounded-xl border border-white/10 divide-y divide-white/10">
-        <div className="px-5 py-4 space-y-1">
-          <SectionLabel>School</SectionLabel>
-          <Row label="Name" value={school.name} />
-          {cityState && <Row label="Location" value={cityState} />}
-        </div>
-
-        <div className="px-5 py-4 space-y-1">
-          <SectionLabel>App</SectionLabel>
-          <Row label="App name" value={school.appName} />
-        </div>
-
-        <div className="px-5 py-4 space-y-1">
-          <SectionLabel>Schedule</SectionLabel>
-          <Row label="Day types" value={dayTypeCount} />
-          <Row label="Lunch waves" value={lunchWaveCount} />
-        </div>
-
-        <div className="px-5 py-4 space-y-1">
-          <SectionLabel>Calendar</SectionLabel>
-          <Row label="No-school days" value={calendar.noSchoolDates.length} />
-          <Row label="Events" value={calendar.events.length} />
-        </div>
-
-        <div className="px-5 py-4 space-y-1">
-          <SectionLabel>Features</SectionLabel>
-          <Row label="Events & Calendar" value={features.events ? "Enabled" : "Disabled"} />
-          <Row label="Productivity Tools" value={features.productivity ? "Enabled" : "Disabled"} />
-        </div>
-
-        <div className="px-5 py-4 space-y-1">
-          <SectionLabel>Contact</SectionLabel>
-          <Row label="Email" value={contactEmail} />
-        </div>
-      </div>
-
-      {/* Deploy button */}
-      <button
-        onClick={handleDeploy}
-        disabled={!canDeploy || isDeploying}
-        className="w-full cursor-pointer rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition-colors duration-150 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {isDeploying ? (isEditMode ? "Saving..." : "Deploying...") : (isEditMode ? "Save Changes" : "Deploy Your Dashboard")}
-      </button>
-
-      {!canDeploy && (
-        <p className="text-center text-xs text-gray-500">
-          School name and contact email are required to deploy.
-        </p>
-      )}
-
-      <DeployProgress state={deployState} url={deployUrl} error={deployError} isEditMode={isEditMode} />
+      {/* ── Deploy log ─────────────────────────────────────────────────────── */}
+      <DeployProgress
+        state={deployState}
+        url={deployUrl}
+        error={deployError}
+        isEditMode={isEditMode}
+      />
     </div>
   );
 }
