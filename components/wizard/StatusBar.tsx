@@ -1,12 +1,13 @@
 import Kbd from "./Kbd";
 
 // Sticky footer for the wizard: keyboard hints on the left, validity + nav on the right.
-// Reference: wizard-terminal.html — .statusbar block
+// Paper-dark band with hairline top border. Primary CTA uses the signature ink-button
+// with yellow offset shadow from ZineHero.tsx.
 type Props = {
   status: "valid" | "invalid" | "pending";
-  statusText: string;          // e.g. "8 of 8 required fields"
+  statusText: string;
   onBack: () => void;
-  onNext?: () => void;         // omit on final step
+  onNext?: () => void;
   isFirst: boolean;
 };
 
@@ -19,39 +20,44 @@ export default function StatusBar({
 }: Props) {
   const statusColor =
     status === "valid"
-      ? "var(--color-ok)"
+      ? "#3a7d5c"
       : status === "invalid"
-      ? "var(--color-warn)"
-      : "var(--color-text-faded)";
+      ? "var(--marker)"
+      : "var(--ink-faded)";
 
   return (
     <div
-      className="flex items-center justify-between gap-4 border-t border-[color:var(--color-line)] bg-[color:var(--color-bg-raised)] px-[18px] py-2 text-[11px] text-[color:var(--color-text-faded)]"
+      className="sticky bottom-0 z-20 flex items-center justify-between gap-4 border-t border-[color:var(--color-hairline)] bg-[color:var(--color-paper-dark)] px-[18px] py-3 text-[11px] text-[color:var(--color-ink-faded)]"
       style={{ fontFamily: "var(--font-mono)" }}
     >
-      <div className="flex flex-wrap gap-5">
+      {/* Keyboard hints — desktop only. On mobile the paper surface is tight. */}
+      <div className="hidden flex-wrap gap-5 md:flex">
         <span className="flex items-center gap-1.5">
-          <Kbd>TAB</Kbd> next field
+          <Kbd>TAB</Kbd>
+          <span className="text-[color:var(--color-ink)]/60">next field</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <Kbd>⏎</Kbd> continue
+          <Kbd>⏎</Kbd>
+          <span className="text-[color:var(--color-ink)]/60">continue</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <Kbd>⌘</Kbd> <Kbd>←</Kbd> back
+          <Kbd>⌘</Kbd> <Kbd>←</Kbd>
+          <span className="text-[color:var(--color-ink)]/60">back</span>
         </span>
       </div>
-      <div className="flex items-center gap-4">
-        <span style={{ color: statusColor }}>
-          {status === "valid" ? "● " : status === "invalid" ? "▲ " : "○ "}
+      <div className="flex flex-1 items-center justify-end gap-4 md:flex-initial">
+        <span
+          style={{ color: statusColor, fontFamily: "var(--font-display)", fontStyle: "italic" }}
+          className="text-[13px]"
+        >
           {statusText}
         </span>
-        <span>·</span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onBack}
             disabled={isFirst}
-            className="cursor-pointer border border-[color:var(--color-line-strong)] bg-transparent px-2.5 py-1 text-[color:var(--color-text-dim)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-foreground)] disabled:cursor-not-allowed disabled:opacity-30"
+            className="group inline-flex items-center gap-1 text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] underline underline-offset-4 decoration-[1.5px] transition-colors duration-150 hover:text-[color:var(--color-marker)] hover:decoration-[color:var(--color-marker)] hover:[text-decoration-style:wavy] disabled:cursor-not-allowed disabled:opacity-30 disabled:no-underline"
             style={{ fontFamily: "var(--font-mono)" }}
           >
             ← back
@@ -60,10 +66,13 @@ export default function StatusBar({
             <button
               type="button"
               onClick={onNext}
-              className="cursor-pointer border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-2.5 py-1 font-bold text-black hover:brightness-110"
-              style={{ fontFamily: "var(--font-mono)" }}
+              className="group inline-flex cursor-pointer items-center gap-2 border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-4 py-2 text-[color:var(--color-paper)] shadow-[4px_4px_0_var(--highlight)] transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_var(--highlight)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0_0_0_var(--highlight)] active:duration-75"
+              style={{ fontFamily: "var(--font-archivo)", fontSize: 13, letterSpacing: "0.02em" }}
             >
-              next →
+              NEXT
+              <span className="text-[16px] leading-[0] transition-transform duration-150 group-hover:translate-x-0.5">
+                →
+              </span>
             </button>
           )}
         </div>
