@@ -17,16 +17,29 @@ type Status = "verifying" | "loading" | "ready" | "error";
 
 function Spinner() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
+    <div className="theme-zine min-h-screen bg-[color:var(--paper)] flex items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--color-ink)] border-t-transparent" />
     </div>
   );
 }
 
 function ErrorMessage({ message }: { message: string }) {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <p className="text-gray-400 text-sm">{message}</p>
+    <div className="theme-zine min-h-screen bg-[color:var(--paper)] flex items-center justify-center px-6">
+      <div className="max-w-[440px] border-l-[3px] border-[color:var(--color-marker)] pl-5 py-3">
+        <p
+          className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-marker)]"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
+          can&rsquo;t load
+        </p>
+        <p
+          className="mt-2 text-[16px] italic leading-[1.5] text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {message}
+        </p>
+      </div>
     </div>
   );
 }
