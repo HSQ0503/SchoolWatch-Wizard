@@ -143,7 +143,7 @@ export default function StepLunchWaves({ data, onChange }: StepProps) {
                       name="default-wave"
                       checked={defaultWave === wave.id}
                       onChange={() => updateLunchWaves({ default: wave.id })}
-                      className="accent-[color:var(--color-marker)]"
+                      className="accent-[var(--color-marker)]"
                     />
                     default
                   </label>
