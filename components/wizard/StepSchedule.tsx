@@ -146,6 +146,7 @@ function PeriodTable({
               style={{ fontFamily: "var(--font-display)" }}
               value={b.name}
               placeholder="Period name"
+              aria-label="Period name"
               onChange={(e) => onUpdate(i, { name: e.target.value })}
             />
             <input
@@ -342,6 +343,7 @@ export default function StepSchedule({ data, onChange }: StepProps) {
                 className="flex-1 border-0 border-b-2 border-[color:var(--color-ink)] bg-transparent py-1.5 text-[20px] text-[color:var(--color-ink)] placeholder-[color:var(--color-ink-faded)]/60 focus:border-[color:var(--color-marker)] focus:outline-none"
                 style={{ fontFamily: "var(--font-display)" }}
                 placeholder="Day type name"
+                aria-label="Day type name"
                 value={activeDayType.label}
                 onChange={(e) => updateDayTypeLabel(e.target.value)}
               />
