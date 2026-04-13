@@ -37,6 +37,7 @@ export default function SignalsRow() {
 
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValues(SIGNALS.map((s) => s.to));
       return;
     }
