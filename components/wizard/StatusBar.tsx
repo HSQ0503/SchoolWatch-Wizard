@@ -27,8 +27,8 @@ export default function StatusBar({
 
   return (
     <div
-      className="sticky bottom-0 z-20 flex items-center justify-between gap-4 border-t border-[color:var(--color-hairline)] bg-[color:var(--color-paper-dark)] px-[18px] py-3 text-[11px] text-[color:var(--color-ink-faded)]"
-      style={{ fontFamily: "var(--font-mono)" }}
+      className="sticky bottom-0 z-20 flex items-center justify-between gap-4 border-t border-[color:var(--color-hairline)] px-[18px] py-3 text-[11px] text-[color:var(--color-ink-faded)]"
+      style={{ fontFamily: "var(--font-mono)", background: "#ebe3d1" }}
     >
       {/* Keyboard hints — desktop only. On mobile the paper surface is tight. */}
       <div className="hidden flex-wrap gap-5 md:flex">

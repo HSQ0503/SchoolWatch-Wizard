@@ -13,8 +13,8 @@ export default function ProgressStrip({ current, total, label }: Props) {
   const pad = (n: number) => n.toString().padStart(2, "0");
   return (
     <div
-      className="sticky top-[38px] z-20 flex items-center gap-4 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper-dark)] px-[18px] py-3.5 text-xs text-[color:var(--color-ink-faded)]"
-      style={{ fontFamily: "var(--font-mono)" }}
+      className="sticky top-[38px] z-20 flex items-center gap-4 border-b border-[color:var(--color-hairline)] px-[18px] py-3.5 text-xs text-[color:var(--color-ink-faded)]"
+      style={{ fontFamily: "var(--font-mono)", background: "#ebe3d1" }}
     >
       <div>
         step{" "}

@@ -404,12 +404,13 @@ export default function StepSchedule({ data, onChange }: StepProps) {
                     key={dt.id}
                     type="button"
                     onClick={() => setActiveDayTypeIndex(i)}
-                    className={`cursor-pointer border-[1.5px] border-[color:var(--color-ink)] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] transition-colors ${
-                      isActive
-                        ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
-                        : "bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/5"
+                    className={`cursor-pointer border-[1.5px] border-[color:var(--color-ink)] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] transition-colors ${
+                      isActive ? "" : "bg-[color:var(--color-paper)] hover:bg-[color:var(--color-ink)]/5"
                     }`}
-                    style={{ fontFamily: "var(--font-mono)" }}
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      background: isActive ? "var(--highlight)" : undefined,
+                    }}
                   >
                     {dt.label || "Untitled"}
                   </button>

@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function ZineNav() {
   return (
     <nav
-      className="sticky top-0 z-[999] flex items-center justify-between border-b border-[color:var(--color-hairline)] bg-[color:var(--paper)] px-8 py-5"
+      className="sticky top-0 z-[9999] flex items-center justify-between border-b border-[color:var(--color-hairline)] bg-[color:var(--paper)] px-8 py-5"
       style={{
         fontFamily: "var(--font-mono)",
         fontSize: 12,
@@ -17,9 +17,9 @@ export default function ZineNav() {
         <img src="/schoolwatch-logo.svg" alt="SchoolWatch" className="h-8 w-auto" />
       </div>
       <div className="flex items-center gap-7">
-        <a href="#how" className="text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">How it works</a>
-        <a href="#showcase" className="text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">Live example</a>
-        <a href="#faq" className="text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">FAQ</a>
+        <a href="#how" className="hidden md:inline text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">How it works</a>
+        <a href="#showcase" className="hidden md:inline text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">Live example</a>
+        <a href="#faq" className="hidden md:inline text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">FAQ</a>
         <Link
           href="/setup"
           className="group inline-flex items-center gap-2 border-2 border-[color:var(--ink)] bg-[color:var(--ink)] px-4 py-2 text-[color:var(--paper)] shadow-[4px_4px_0_var(--highlight)] transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_var(--highlight)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0_0_0_var(--highlight)] active:duration-75"
