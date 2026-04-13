@@ -112,7 +112,7 @@ export default function StepReview({ data, schoolId }: StepProps) {
         variants={headerContainer}
       >
         <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>
-          step 07 / review &amp; deploy
+          step 06 / review &amp; deploy
         </motion.p>
         <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
           <span style={italicAccent}>One more</span> look.

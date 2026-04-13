@@ -164,7 +164,7 @@ export default function StepCalendar({ data, onChange }: StepProps) {
           animate="visible"
           variants={headerContainer}
         >
-          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 05 / calendar</motion.p>
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 04 / calendar</motion.p>
           <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
             Pin the <span style={italicAccent}>important dates.</span>
           </motion.h1>
@@ -314,7 +314,7 @@ export default function StepCalendar({ data, onChange }: StepProps) {
               transform: "rotate(-6deg)",
             }}
           >
-            5
+            4
           </span>
           <p
             className="text-[15px] italic leading-[1.5] text-[color:var(--color-ink-soft)]"

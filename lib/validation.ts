@@ -9,8 +9,7 @@ export function validateStep(step: number, data: WizardFormData): string[] {
     case 0: return validateSchoolInfo(data);
     case 1: return validateColors(data);
     case 2: return validateSchedule(data);
-    case 3: return validateLunchWaves(data);
-    case 4: return validateCalendar(data);
+    case 3: return validateCalendar(data);
     default: return [];
   }
 }
@@ -119,31 +118,6 @@ function validateSchedule(data: WizardFormData): string[] {
         );
       }
     }
-  }
-
-  return errors;
-}
-
-function validateLunchWaves(data: WizardFormData): string[] {
-  if (!data.lunchWaves.enabled) return [];
-
-  const errors: string[] = [];
-  const { options } = data.lunchWaves;
-
-  if (options.length === 0) {
-    errors.push("Add at least one lunch wave or disable lunch waves");
-    return errors;
-  }
-
-  for (let i = 0; i < options.length; i++) {
-    if (!options[i].id.trim()) errors.push(`Wave ${i + 1} needs an ID`);
-    if (!options[i].label.trim()) errors.push(`Wave ${i + 1} needs a label`);
-  }
-
-  const ids = options.map((o) => o.id);
-  if (new Set(ids).size !== ids.length) errors.push("Wave IDs must be unique");
-  if (!data.lunchWaves.default || !ids.includes(data.lunchWaves.default)) {
-    errors.push("Select a default lunch wave");
   }
 
   return errors;

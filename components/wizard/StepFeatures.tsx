@@ -78,7 +78,7 @@ export default function StepFeatures({ data, onChange }: StepProps) {
           animate="visible"
           variants={headerContainer}
         >
-          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 06 / features</motion.p>
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 05 / features</motion.p>
           <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
             Pick the <span style={italicAccent}>extras.</span>
           </motion.h1>
@@ -149,7 +149,7 @@ export default function StepFeatures({ data, onChange }: StepProps) {
               transform: "rotate(-6deg)",
             }}
           >
-            6
+            5
           </span>
           <p
             className="text-[15px] italic leading-[1.5] text-[color:var(--color-ink-soft)]"
