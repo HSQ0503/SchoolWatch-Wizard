@@ -1,8 +1,8 @@
 "use client";
 
-// ASCII-style progress: "step NN / MM  ██████░░░  LABEL"
-// Active cell gets a hatched-animation overlay and a coral glow.
-// Reference: wizard-terminal.html — .progress block
+// Paper-panel progress bar below the topbar. 7 chunky bell-cells with ink borders.
+// Active cell fills with highlight yellow and gets a 3px hard offset shadow in ink.
+// Replaces the ASCII-style coral hatched bar.
 type Props = {
   current: number; // zero-indexed active step
   total: number;
@@ -13,41 +13,42 @@ export default function ProgressStrip({ current, total, label }: Props) {
   const pad = (n: number) => n.toString().padStart(2, "0");
   return (
     <div
-      className="flex items-center gap-4 border-b border-[color:var(--color-line)] px-[18px] py-3.5 text-xs"
+      className="sticky top-[38px] z-20 flex items-center gap-4 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper-dark)] px-[18px] py-3.5 text-xs text-[color:var(--color-ink-faded)]"
       style={{ fontFamily: "var(--font-mono)" }}
     >
-      <div className="text-[color:var(--color-text-faded)]">
+      <div>
         step{" "}
-        <b className="font-bold text-[color:var(--color-accent)]">
+        <b
+          className="text-[color:var(--color-marker)]"
+          style={{ fontFamily: "var(--font-archivo)", fontWeight: 900 }}
+        >
           {pad(current + 1)}
-        </b>{" "}
-        / {pad(total)}
+        </b>
+        {" / "}
+        {pad(total)}
       </div>
       <div className="flex flex-1 gap-[3px]">
         {Array.from({ length: total }).map((_, i) => {
           const isDone = i < current;
           const isActive = i === current;
+          const filled = isDone || isActive;
           return (
             <div
               key={i}
-              className={`relative h-3 flex-1 overflow-hidden border ${
-                isDone || isActive
-                  ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]"
-                  : "border-[color:var(--color-line-strong)] bg-[color:var(--color-background)]"
-              }`}
-              style={
-                isActive
-                  ? { boxShadow: "0 0 12px rgba(255,99,99,0.6)" }
-                  : undefined
-              }
+              className="relative h-3 flex-1 border-[1.5px] border-[color:var(--color-ink)]"
+              style={{
+                background: filled ? "var(--highlight)" : "var(--paper)",
+                boxShadow: isActive ? "3px 3px 0 var(--ink)" : undefined,
+              }}
             >
               {isActive && (
                 <span
                   aria-hidden="true"
-                  className="absolute inset-0 animate-[progress-slide_1s_linear_infinite]"
+                  className="absolute inset-0 motion-safe:animate-[zine-shimmer_2.4s_ease-in-out_infinite]"
                   style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(-45deg, transparent 0 3px, rgba(0,0,0,0.2) 3px 6px)",
+                    background:
+                      "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)",
+                    backgroundSize: "200% 100%",
                   }}
                 />
               )}
@@ -55,14 +56,16 @@ export default function ProgressStrip({ current, total, label }: Props) {
           );
         })}
       </div>
-      <div className="min-w-[140px] text-right text-[11px] uppercase tracking-[0.1em] text-[color:var(--color-foreground)]">
+      <div
+        className="min-w-[140px] text-right text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink)]"
+      >
         {label}
       </div>
 
       <style>{`
-        @keyframes progress-slide {
-          from { background-position: 0 0; }
-          to   { background-position: 24px 0; }
+        @keyframes zine-shimmer {
+          0%, 100% { background-position: -50% 0; }
+          50% { background-position: 150% 0; }
         }
       `}</style>
     </div>
