@@ -147,7 +147,7 @@ export default function WizardShell({ steps, initialData, schoolId }: WizardShel
       `[WizardShell] No step component at index ${currentStep}. Steps array length: ${steps.length}`
     );
     return (
-      <div className="p-8 text-[color:var(--color-accent)]">
+      <div className="p-8 text-[color:var(--color-marker)]">
         Error: No step component at index {currentStep}
       </div>
     );
