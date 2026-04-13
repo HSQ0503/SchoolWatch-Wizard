@@ -170,14 +170,7 @@ export default function WizardShell({ steps, initialData, schoolId }: WizardShel
       : `${currentErrors.length} issue${currentErrors.length === 1 ? "" : "s"} to fix`;
 
   return (
-    <div
-      className="flex min-h-screen flex-col bg-[color:var(--background)] text-[color:var(--color-foreground)]"
-      style={{
-        backgroundImage:
-          "linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)",
-        backgroundSize: "32px 32px",
-      }}
-    >
+    <div className="theme-zine flex min-h-screen flex-col bg-[color:var(--paper)] text-[color:var(--color-ink)]">
       <WizardTopBar />
       <ProgressStrip
         current={currentStep}

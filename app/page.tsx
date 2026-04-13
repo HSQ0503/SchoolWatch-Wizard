@@ -12,7 +12,7 @@ import ZineNav from "@/components/landing/ZineNav";
 
 export default function Home() {
   return (
-    <main className="theme-zine relative">
+    <main className="theme-zine theme-zine-landing relative">
       <PaperNoise />
       <ScrollProgress />
       <ZineNav />
