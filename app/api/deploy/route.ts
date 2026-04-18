@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const configContent = generateConfigTs(dataForConfig, logoPath);
+    const configContent = generateConfigTs(dataForConfig, logoPath, slug);
     await pushFile(repoName, "school.config.ts", configContent, "Configure school via wizard");
 
     // Explicitly trigger the first deployment — Vercel's git webhook may not be

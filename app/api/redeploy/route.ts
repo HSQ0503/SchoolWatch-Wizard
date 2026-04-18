@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const configContent = generateConfigTs(dataForConfig, logoPath);
+    const configContent = generateConfigTs(dataForConfig, logoPath, school.slug);
     await pushFile(school.githubRepoName, "school.config.ts", configContent, "Update school config via wizard");
 
     await prisma.school.update({
