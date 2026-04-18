@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
   const school = await prisma.school.findFirst({
     where: { contactEmail: email },
-    select: { id: true, configData: true },
+    select: { id: true, configData: true, slug: true },
   });
   if (!school) {
     return NextResponse.json({ error: "School not found" }, { status: 404 });
