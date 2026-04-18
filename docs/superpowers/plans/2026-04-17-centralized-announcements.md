@@ -565,7 +565,7 @@ export async function GET(
     return NextResponse.json([], { headers: PUBLIC_HEADERS });
   }
 
-  const now = new Date().toISOString();
+  const now = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD" — matches expiresAt format
   const rows = await prisma.announcement.findMany({
     where: {
       schoolId: school.id,
@@ -699,7 +699,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const now = new Date().toISOString();
+  const now = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD" — matches expiresAt format
   const activeCount = await prisma.announcement.count({
     where: {
       schoolId,
