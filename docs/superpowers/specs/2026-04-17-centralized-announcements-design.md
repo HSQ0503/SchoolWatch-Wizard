@@ -188,7 +188,7 @@ All patterns lifted 1:1 from `C:/Dev/Lakerwatch/components/AdminAnnouncementsPan
 ### Navigation touch-ups
 
 - `/login` form unchanged; magic-link email text updated to "manage your school" instead of "edit your school" (`lib/email.ts`).
-- `/edit?token=...` route kept for backward compat — handler runs existing magic-link verify, then `redirect('/manage/<slug>')`.
+- `/edit?token=...` route kept for backward compat — handler runs existing magic-link verify, sets the session cookie, resolves the user's school via `findFirst({ where: { contactEmail } })` (same lookup `app/api/schools/by-email/route.ts:25` uses today), then `redirect('/manage/<slug>')`. Assumes one school per `contactEmail`, matching current wizard behavior.
 - Landing page CTAs unchanged.
 
 ## Deployed template changes (`C:/Dev/SchoolWatch`)
