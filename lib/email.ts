@@ -13,25 +13,25 @@ export async function sendMagicLinkEmail(
   // Deterministic idempotency key to prevent duplicate sends on retry
   const idempotencyKey = `magic-link-${email}-${Math.floor(Date.now() / 60000)}`;
 
-  const preheader = `Your edit link for ${schoolName} — expires in 15 minutes`;
+  const preheader = `Your manage link for ${schoolName} — expires in 15 minutes`;
 
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     replyTo: REPLY_TO,
     to: email,
-    subject: `Edit your ${schoolName} dashboard`,
+    subject: `Manage your ${schoolName} dashboard`,
     headers: {
       "X-Entity-Ref-ID": idempotencyKey,
     },
     text: [
       "SchoolWatch",
       "",
-      `Edit your ${schoolName} dashboard`,
+      `Manage your ${schoolName} dashboard`,
       "",
-      `You requested a link to edit the ${schoolName} dashboard.`,
+      `You requested a link to manage the ${schoolName} dashboard.`,
       "This link expires in 15 minutes.",
       "",
-      `Edit Dashboard: ${url}`,
+      `Manage Dashboard: ${url}`,
       "",
       "If you didn't request this, you can safely ignore this email.",
     ].join("\n"),
@@ -43,7 +43,7 @@ export async function sendMagicLinkEmail(
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta name="color-scheme" content="dark" />
           <meta name="supported-color-schemes" content="dark" />
-          <title>Edit your ${escHtml(schoolName)} dashboard</title>
+          <title>Manage your ${escHtml(schoolName)} dashboard</title>
         </head>
         <body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
           <!--[if mso]><table role="presentation" width="100%"><tr><td><![endif]-->
@@ -59,16 +59,16 @@ export async function sendMagicLinkEmail(
                   <tr>
                     <td>
                       <p style="margin:0 0 8px;font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;">SchoolWatch</p>
-                      <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#f1f5f9;line-height:1.3;">Edit your dashboard</h1>
+                      <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#f1f5f9;line-height:1.3;">Manage your dashboard</h1>
                       <p style="margin:0 0 32px;font-size:16px;color:#94a3b8;line-height:1.6;">
-                        You requested a link to edit the <strong style="color:#e2e8f0;">${escHtml(schoolName)}</strong> dashboard.
+                        You requested a link to manage the <strong style="color:#e2e8f0;">${escHtml(schoolName)}</strong> dashboard.
                         This link expires in <strong style="color:#e2e8f0;">15 minutes</strong>.
                       </p>
                       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
                         <tr>
                           <td align="center" style="background:#3b82f6;border-radius:8px;">
                             <a href="${escHtml(url)}" target="_blank" style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;padding:14px 32px;border-radius:8px;line-height:1;">
-                              Edit Dashboard
+                              Manage Dashboard
                             </a>
                           </td>
                         </tr>
