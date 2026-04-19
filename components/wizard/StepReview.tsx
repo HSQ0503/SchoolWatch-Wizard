@@ -82,9 +82,40 @@ export default function StepReview({ data, schoolId }: StepProps) {
 
       const json = await res.json();
       setDeployState("deploying");
-      await new Promise((r) => setTimeout(r, 1000));
+
+      // Wait for Vercel to finish building before reporting "live" — otherwise
+      // the link points at a half-built deployment and looks broken.
+      // New deploys: poll real Vercel state via /api/deploy/status.
+      // Edit/redeploy: fixed wait (redeploy flow doesn't return a deploymentId).
+      if (!isEditMode && json.deploymentId) {
+        const TIMEOUT_MS = 3 * 60 * 1000;
+        const POLL_MS = 4000;
+        const start = Date.now();
+        while (Date.now() - start < TIMEOUT_MS) {
+          await new Promise((r) => setTimeout(r, POLL_MS));
+          try {
+            const statusRes = await fetch(
+              `/api/deploy/status?deploymentId=${encodeURIComponent(json.deploymentId)}`
+            );
+            if (!statusRes.ok) continue;
+            const { state } = await statusRes.json();
+            if (state === "READY") break;
+            if (state === "ERROR" || state === "CANCELED") {
+              throw new Error("Vercel build failed");
+            }
+          } catch (pollErr) {
+            if (pollErr instanceof Error && pollErr.message === "Vercel build failed") {
+              throw pollErr;
+            }
+            // transient network error — keep polling
+          }
+        }
+      } else {
+        await new Promise((r) => setTimeout(r, 30000));
+      }
+
       setDeployState("done");
-      setDeployUrl(isEditMode ? json.deployedUrl : json.deployedUrl);
+      setDeployUrl(json.deployedUrl);
     } catch (err) {
       setDeployState("error");
       setDeployError(err instanceof Error ? err.message : "Unknown error");

@@ -68,7 +68,7 @@ const PENDING_LABEL: Record<Exclude<DeployState, "idle" | "error" | "done">, str
   "creating-repo": "creating github repo",
   "pushing-config": "pushing config",
   "creating-project": "creating vercel project",
-  "deploying": "waiting for deployment",
+  "deploying": "waiting for vercel build (~1 min)",
 };
 
 export default function DeployLog({ state, url, error, isEditMode }: Props) {
