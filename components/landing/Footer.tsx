@@ -30,9 +30,9 @@ export default function Footer() {
         <div className="flex flex-col items-start justify-between gap-4 text-[12px] text-[color:var(--color-ink-faded)] sm:flex-row sm:items-center">
           <p>
             SchoolWatch · made by{" "}
-            <a href="#" className="text-[color:var(--color-ink)] underline decoration-[color:var(--color-marker)] underline-offset-2">Guga</a>{" "}
+            <a href="https://www.linkedin.com/in/gustavopcampos/" target="_blank" rel="noopener noreferrer" className="text-[color:var(--color-ink)] underline decoration-[color:var(--color-marker)] underline-offset-2">Guga</a>{" "}
             and{" "}
-            <a href="#" className="text-[color:var(--color-ink)] underline decoration-[color:var(--color-marker)] underline-offset-2">Han</a>{" "}
+            <a href="https://www.linkedin.com/in/shouqi-han-726110348/" target="_blank" rel="noopener noreferrer" className="text-[color:var(--color-ink)] underline decoration-[color:var(--color-marker)] underline-offset-2">Han</a>{" "}
             @ WPS
           </p>
           <div className="flex gap-6">
