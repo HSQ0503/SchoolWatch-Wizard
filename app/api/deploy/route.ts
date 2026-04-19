@@ -60,8 +60,10 @@ export async function POST(req: NextRequest) {
 
     // Explicitly trigger the first deployment — Vercel's git webhook may not be
     // registered in time to catch the config push commit on a new project
+    let deploymentId: string | null = null;
     try {
-      await triggerDeployment(repoName, repo.fullName);
+      const d = await triggerDeployment(repoName, repo.fullName);
+      deploymentId = d.deploymentId;
     } catch (deployErr) {
       console.error("[deploy] Failed to trigger initial deployment:", deployErr);
     }
@@ -92,6 +94,7 @@ export async function POST(req: NextRequest) {
       schoolId: school.id,
       deployedUrl: school.deployedUrl,
       vercelProjectId: school.vercelProjectId,
+      deploymentId,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

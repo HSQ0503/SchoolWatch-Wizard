@@ -4,30 +4,70 @@ import { useState, useCallback } from "react";
 import { defaultLightColors, resolveDarkColors } from "@/lib/colors";
 import type { ZoneColors } from "@/lib/colors";
 import type { WizardFormData } from "@/lib/types";
+import DashboardPreview from "./DashboardPreview";
+import TapedScreenshot from "@/components/landing/TapedScreenshot";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = {
   data: WizardFormData;
   onChange: (data: WizardFormData) => void;
 };
 
-const inputClass =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white font-mono placeholder-gray-500 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors duration-150";
+// Zine step-body primitives (shared visual language used by all 7 steps).
+const kickerCls =
+  "mb-3 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-ink-faded)]";
+const headlineCls =
+  "font-[900] leading-[0.95] tracking-[-0.02em] text-[color:var(--color-ink)]";
+const subcopyCls =
+  "mt-4 text-[15px] leading-[1.55] text-[color:var(--color-ink-soft)]";
+const labelCls =
+  "mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
+const underlineInputCls =
+  "w-full border-0 border-b-2 border-[color:var(--color-ink)] bg-transparent px-0 py-2 text-[18px] text-[color:var(--color-ink)] placeholder-[color:var(--color-ink-faded)]/60 focus:border-[color:var(--color-marker)] focus:outline-none";
 
-const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
-
-const ZONE_LABELS: Record<keyof ZoneColors, string> = {
-  navbar: "Navbar",
-  navText: "Nav Text",
-  background: "Background",
-  heading: "Heading",
-  ring: "Timer Ring",
-  surface: "Card Surface",
-  cardAccent: "Card Accent",
-  badge: "Badge",
+const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const headlineFont: React.CSSProperties = {
+  fontFamily: "var(--font-archivo)",
+  fontSize: "clamp(32px, 4.2vw, 52px)",
 };
+const italicAccent: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontStyle: "italic",
+  fontWeight: 400,
+  letterSpacing: "-0.01em",
+};
+const subcopyFont: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  maxWidth: "52ch",
+};
+const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
+// Suppress unused-variable lint for underlineInputCls (kept for consistency with other steps).
+void underlineInputCls;
+void subcopyFont;
+
+const ZONE_ORDER: (keyof ZoneColors)[] = [
+  "navbar",
+  "navText",
+  "background",
+  "heading",
+  "ring",
+  "surface",
+  "cardAccent",
+  "badge",
+];
 
 export default function StepColors({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   const { primary, accent } = data.colors;
 
   const [overriddenZones, setOverriddenZones] = useState<Set<string>>(
@@ -37,9 +77,9 @@ export default function StepColors({ data, onChange }: StepProps) {
     zone: keyof ZoneColors;
     mode: "light" | "dark";
   } | null>(null);
-  const [darkMode, setDarkMode] = useState<
-    "hidden" | "preview" | "customize"
-  >("hidden");
+  const [darkMode, setDarkMode] = useState<"hidden" | "preview" | "customize">(
+    "hidden"
+  );
 
   // Compute resolved dark colors for preview/customize
   const resolvedDark = resolveDarkColors(data.colors.light, data.colors.dark);
@@ -161,271 +201,218 @@ export default function StepColors({ data, onChange }: StepProps) {
       ? data.colors.light[activeZone.zone as keyof ZoneColors]
       : resolvedDark[activeZone.zone as keyof ZoneColors]);
 
+  const currentMode: "light" | "dark" = showingDark ? "dark" : "light";
+
   return (
-    <div className="space-y-8">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
+      {/* Left column */}
       <div>
-        <h2 className="text-xl font-semibold text-white">School Colors</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          Pick your brand colors, then click any zone on the mockup to
-          fine-tune.
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>
+            step 02 / colors
+          </motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Pick the <span style={italicAccent}>palette.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={{ fontFamily: "var(--font-display)", maxWidth: "52ch" }}>
+            Pick two seed colors — primary (for most of the interface) and accent
+            (for small highlights). We&rsquo;ll fill in the rest, and you can
+            override any individual zone below.
+          </motion.p>
+        </motion.div>
+
+        {/* Inline tip */}
+        <p
+          className="mt-6 text-[14px] italic text-[color:var(--color-marker)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Pick one strong color and one quiet one. The preview on the right
+          updates live — tweak until it looks like you.
         </p>
-      </div>
 
-      {/* Seed color pickers */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className={labelClass}>Primary Color</label>
-          <div className="flex items-center gap-3">
+        {/* Seed swatches */}
+        <div className="mt-8 flex flex-col gap-6 sm:flex-row">
+          {/* Primary seed */}
+          <label className="flex cursor-pointer items-center gap-4">
+            <span
+              className="block h-24 w-24 border-2 border-[color:var(--color-ink)]"
+              style={{ background: data.colors.primary }}
+            />
             <input
               type="color"
-              value={primary || "#000000"}
+              value={data.colors.primary || "#000000"}
               onChange={(e) => updateSeeds({ primary: e.target.value })}
-              className="h-11 w-14 cursor-pointer rounded-lg border border-white/20 bg-transparent p-1"
-              aria-label="Pick primary color"
+              className="sr-only"
             />
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="#003da5"
-              maxLength={7}
-              value={primary}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (/^#[0-9a-fA-F]{0,6}$/.test(val))
-                  updateSeeds({ primary: val });
-              }}
+            <div>
+              <p className={labelCls} style={labelFont}>
+                Primary seed
+              </p>
+              <p
+                className="text-[15px] text-[color:var(--color-ink)]"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                {(data.colors.primary || "#000000").toUpperCase()}
+              </p>
+            </div>
+          </label>
+
+          {/* Accent seed */}
+          <label className="flex cursor-pointer items-center gap-4">
+            <span
+              className="block h-24 w-24 border-2 border-[color:var(--color-ink)]"
+              style={{ background: data.colors.accent }}
             />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <label className={labelClass}>Accent Color</label>
-          <div className="flex items-center gap-3">
             <input
               type="color"
-              value={accent || "#000000"}
+              value={data.colors.accent || "#000000"}
               onChange={(e) => updateSeeds({ accent: e.target.value })}
-              className="h-11 w-14 cursor-pointer rounded-lg border border-white/20 bg-transparent p-1"
-              aria-label="Pick accent color"
+              className="sr-only"
             />
-            <input
-              className={inputClass}
-              type="text"
-              placeholder="#f59e0b"
-              maxLength={7}
-              value={accent}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (/^#[0-9a-fA-F]{0,6}$/.test(val))
-                  updateSeeds({ accent: val });
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Dashboard Mockup */}
-      <div
-        style={{
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 12,
-          overflow: "hidden",
-          maxHeight: 500,
-          background: palette.background,
-          fontFamily:
-            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        }}
-      >
-        {/* Navbar */}
-        <div
-          style={{
-            background: palette.navbar,
-            padding: "10px 16px",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-          }}
-          {...zoneProps("navbar")}
-        >
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 6,
-              background: palette.navText,
-              flexShrink: 0,
-            }}
-          />
-          <span
-            style={{
-              color: palette.navText,
-              fontWeight: 700,
-              fontSize: 14,
-            }}
-            {...zoneProps("navText")}
-          >
-            {data.school.appName || "SchoolWatch"}
-          </span>
-          <div style={{ flex: 1 }} />
-          {["Dashboard", "Schedule", "Events"].map((link) => (
-            <span
-              key={link}
-              style={{
-                color: palette.navText,
-                fontSize: 12,
-                opacity: 0.7,
-              }}
-            >
-              {link}
-            </span>
-          ))}
-        </div>
-
-        {/* Page background zone */}
-        <div
-          style={{ padding: 16, background: palette.background }}
-          {...zoneProps("background")}
-        >
-          {/* Hero card */}
-          <div
-            style={{
-              background: palette.surface,
-              borderRadius: 10,
-              padding: "20px 24px",
-              textAlign: "center",
-              marginBottom: 12,
-            }}
-            {...zoneProps("surface")}
-          >
-            <div
-              style={{
-                color: palette.heading,
-                fontSize: 18,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-              {...zoneProps("heading")}
-            >
-              It&apos;s Friday
-            </div>
-
-            {/* Badge */}
-            <span
-              style={{
-                display: "inline-block",
-                background: palette.badge,
-                color: "#ffffff",
-                fontSize: 10,
-                fontWeight: 700,
-                padding: "3px 10px",
-                borderRadius: 999,
-                letterSpacing: "0.05em",
-                marginBottom: 12,
-              }}
-              {...zoneProps("badge")}
-            >
-              REGULAR DAY
-            </span>
-
-            <div
-              style={{
-                color: showingDark ? "#94a3b8" : "#64748b",
-                fontSize: 12,
-                marginBottom: 12,
-              }}
-            >
-              3rd Period
-            </div>
-
-            {/* Timer Ring SVG */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginBottom: 4,
-              }}
-              {...zoneProps("ring")}
-            >
-              <svg width="80" height="80" viewBox="0 0 80 80">
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="34"
-                  fill="none"
-                  stroke={showingDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}
-                  strokeWidth="6"
-                />
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="34"
-                  fill="none"
-                  stroke={palette.ring}
-                  strokeWidth="6"
-                  strokeDasharray={`${2 * Math.PI * 34 * 0.7} ${2 * Math.PI * 34 * 0.3}`}
-                  strokeDashoffset={2 * Math.PI * 34 * 0.25}
-                  strokeLinecap="round"
-                  transform="rotate(-90 40 40)"
-                />
-                <text
-                  x="40"
-                  y="44"
-                  textAnchor="middle"
-                  fill={palette.ring}
-                  fontSize="16"
-                  fontWeight="700"
-                  fontFamily="monospace"
-                >
-                  23:41
-                </text>
-              </svg>
-            </div>
-          </div>
-
-          {/* Glance cards */}
-          <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-          >
-            {[
-              { label: "NEXT EVENT", text: "Spirit Day" },
-              { label: "TO-DO", text: "All caught up!" },
-            ].map((card) => (
-              <div
-                key={card.label}
-                style={{
-                  background: palette.surface,
-                  borderRadius: 8,
-                  padding: "12px 14px",
-                  borderLeft: `3px solid ${palette.cardAccent}`,
-                }}
-                {...zoneProps("cardAccent")}
+            <div>
+              <p className={labelCls} style={labelFont}>
+                Accent seed
+              </p>
+              <p
+                className="text-[15px] text-[color:var(--color-ink)]"
+                style={{ fontFamily: "var(--font-mono)" }}
               >
+                {(data.colors.accent || "#000000").toUpperCase()}
+              </p>
+            </div>
+          </label>
+        </div>
+
+        {/* Individual zones */}
+        <div className="mt-10">
+          <p className={labelCls} style={labelFont}>
+            Individual zones
+          </p>
+          <div>
+            {ZONE_ORDER.map((zone) => {
+              const isOverridden = overriddenZones.has(zone);
+              const zoneColor = palette[zone] || "#000000";
+              return (
                 <div
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 700,
-                    color: palette.cardAccent,
-                    letterSpacing: "0.05em",
-                    marginBottom: 4,
-                  }}
+                  key={zone}
+                  className="flex items-center justify-between gap-4 border-b border-dashed border-[color:var(--color-hairline)] py-3 last:border-b-0"
                 >
-                  {card.label}
+                  <div>
+                    <p
+                      className="text-[13px] text-[color:var(--color-ink)]"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      {zone}
+                    </p>
+                    {isOverridden && (
+                      <p
+                        className="text-[11px] italic text-[color:var(--color-marker)]"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        custom
+                      </p>
+                    )}
+                  </div>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <span
+                      className="block h-8 w-8 border border-[color:var(--color-ink)]"
+                      style={{ background: zoneColor }}
+                    />
+                    <input
+                      type="color"
+                      value={zoneColor}
+                      onChange={(e) =>
+                        updateZoneColor(zone, e.target.value, currentMode)
+                      }
+                      className="sr-only"
+                    />
+                    <span
+                      className="text-[12px] text-[color:var(--color-ink-faded)]"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      {zoneColor.toUpperCase()}
+                    </span>
+                    {isOverridden && currentMode === "light" && (
+                      <button
+                        type="button"
+                        onClick={() => resetZone(zone, "light")}
+                        className="ml-2 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] underline underline-offset-2 hover:text-[color:var(--color-marker)]"
+                        style={{ fontFamily: "var(--font-mono)" }}
+                      >
+                        reset
+                      </button>
+                    )}
+                  </label>
                 </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: showingDark ? "#e2e8f0" : "#1e293b",
-                  }}
-                >
-                  {card.text}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Zone Popover */}
+      {/* Right column — live preview pinned */}
+      <div className="lg:sticky lg:top-[100px] lg:self-start lg:z-10">
+        <TapedScreenshot
+          rotation={-1.5}
+          tapes={[
+            { position: "top-left", color: "yellow" },
+            { position: "top-right", color: "red" },
+          ]}
+        >
+          <DashboardPreview
+            palette={palette}
+            showingDark={showingDark}
+            appName={data.school.appName}
+            zoneProps={zoneProps}
+          />
+        </TapedScreenshot>
+
+        {/* Dark mode toggle — ink-bordered chip buttons */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setDarkMode("hidden")}
+            className={`border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-colors ${
+              darkMode === "hidden"
+                ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                : "border-[color:var(--color-ink)] bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/10"
+            }`}
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            light
+          </button>
+          <button
+            type="button"
+            onClick={() => setDarkMode("preview")}
+            className={`border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-colors ${
+              darkMode === "preview"
+                ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                : "border-[color:var(--color-ink)] bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/10"
+            }`}
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            dark preview
+          </button>
+          <button
+            type="button"
+            onClick={() => setDarkMode("customize")}
+            className={`border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-colors ${
+              darkMode === "customize"
+                ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                : "border-[color:var(--color-ink)] bg-[color:var(--color-paper)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/10"
+            }`}
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            customize dark
+          </button>
+        </div>
+      </div>
+
+      {/* Zone popover — fixed overlay */}
       {activeZone && (
         <div
           style={{
@@ -441,49 +428,53 @@ export default function StepColors({ data, onChange }: StepProps) {
         >
           <div
             style={{
-              background: "#1a1a2e",
-              border: "1px solid rgba(255,255,255,0.15)",
-              borderRadius: 12,
-              padding: 20,
               width: 280,
+              fontFamily: "var(--font-mono)",
+              background: "var(--color-paper)",
+              border: "2px solid var(--color-ink)",
+              padding: "20px",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
                 marginBottom: 16,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
               <span
-                style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "var(--color-ink)",
+                }}
               >
-                {ZONE_LABELS[activeZone.zone]}
+                {activeZone.zone}
               </span>
               <button
                 onClick={() => setActiveZone(null)}
                 style={{
-                  background: "none",
+                  background: "transparent",
                   border: "none",
-                  color: "#94a3b8",
-                  fontSize: 18,
                   cursor: "pointer",
+                  fontSize: 18,
+                  color: "var(--color-ink-faded)",
                   lineHeight: 1,
-                  padding: 4,
+                  padding: 0,
                 }}
+                aria-label="Close"
               >
-                &times;
+                ×
               </button>
             </div>
-
             <div
               style={{
+                marginBottom: 16,
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
-                marginBottom: 16,
               }}
             >
               <input
@@ -497,13 +488,12 @@ export default function StepColors({ data, onChange }: StepProps) {
                   )
                 }
                 style={{
-                  width: 48,
                   height: 40,
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  borderRadius: 8,
-                  background: "transparent",
+                  width: 48,
                   cursor: "pointer",
-                  padding: 2,
+                  border: "2px solid var(--color-ink)",
+                  background: "transparent",
+                  padding: 0,
                 }}
               />
               <input
@@ -515,92 +505,39 @@ export default function StepColors({ data, onChange }: StepProps) {
                   if (/^#[0-9a-fA-F]{0,6}$/.test(val))
                     updateZoneColor(activeZone.zone, val, activeZone.mode);
                 }}
-                className={inputClass}
-                style={{ flex: 1 }}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "0",
+                  borderBottom: "2px solid var(--color-ink)",
+                  padding: "4px 0",
+                  fontSize: 15,
+                  color: "var(--color-ink)",
+                  fontFamily: "var(--font-mono)",
+                  outline: "none",
+                }}
               />
             </div>
-
             <button
               onClick={() => resetZone(activeZone.zone, activeZone.mode)}
               style={{
-                background: "none",
+                background: "transparent",
                 border: "none",
-                color: "#94a3b8",
-                fontSize: 12,
                 cursor: "pointer",
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                color: "var(--color-ink-faded)",
                 textDecoration: "underline",
+                fontFamily: "var(--font-mono)",
                 padding: 0,
               }}
             >
-              Reset to default
+              reset to default
             </button>
           </div>
         </div>
       )}
-
-      {/* Dark Mode Section */}
-      <div
-        style={{
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 10,
-          padding: "14px 18px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 10,
-          }}
-        >
-          <span style={{ color: "#e2e8f0", fontSize: 14, fontWeight: 500 }}>
-            Dark Mode{" "}
-            <span style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}>
-              {darkMode === "hidden" &&
-                "— auto-generated from your light colors"}
-              {darkMode === "preview" && "— preview"}
-              {darkMode === "customize" && "— click zones to customize"}
-            </span>
-          </span>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            {darkMode === "hidden" && (
-              <>
-                <button
-                  onClick={() => setDarkMode("preview")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-white/20 text-gray-300 hover:text-white hover:border-white/40 transition-colors duration-150 cursor-pointer"
-                >
-                  Preview Dark Mode
-                </button>
-                <button
-                  onClick={() => setDarkMode("customize")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-white/20 text-gray-300 hover:text-white hover:border-white/40 transition-colors duration-150 cursor-pointer"
-                >
-                  Customize Dark Mode
-                </button>
-              </>
-            )}
-            {(darkMode === "preview" || darkMode === "customize") && (
-              <button
-                onClick={() => setDarkMode("hidden")}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-white/20 text-gray-300 hover:text-white hover:border-white/40 transition-colors duration-150 cursor-pointer"
-              >
-                Back to Light Mode
-              </button>
-            )}
-            {darkMode === "preview" && (
-              <button
-                onClick={() => setDarkMode("customize")}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-white/20 text-gray-300 hover:text-white hover:border-white/40 transition-colors duration-150 cursor-pointer"
-              >
-                Customize
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

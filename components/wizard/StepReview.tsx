@@ -2,9 +2,19 @@
 
 import { useState } from "react";
 import type { WizardFormData } from "@/lib/types";
-import DeployProgress, { type DeployState } from "@/components/DeployProgress";
+import DeployLog, { type DeployState } from "@/components/wizard/DeployLog";
 import ConfigPreview from "@/components/wizard/ConfigPreview";
 import { defaultLightColors } from "@/lib/colors";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void; schoolId?: string };
 
@@ -32,6 +42,7 @@ void italicAccent;
 void subcopyFont;
 
 export default function StepReview({ data, schoolId }: StepProps) {
+  const reduce = useReducedMotion();
   const isEditMode = !!schoolId;
   const [deployState, setDeployState] = useState<DeployState>("idle");
   const [deployUrl, setDeployUrl] = useState<string | undefined>();
@@ -71,9 +82,40 @@ export default function StepReview({ data, schoolId }: StepProps) {
 
       const json = await res.json();
       setDeployState("deploying");
-      await new Promise((r) => setTimeout(r, 1000));
+
+      // Wait for Vercel to finish building before reporting "live" — otherwise
+      // the link points at a half-built deployment and looks broken.
+      // New deploys: poll real Vercel state via /api/deploy/status.
+      // Edit/redeploy: fixed wait (redeploy flow doesn't return a deploymentId).
+      if (!isEditMode && json.deploymentId) {
+        const TIMEOUT_MS = 3 * 60 * 1000;
+        const POLL_MS = 4000;
+        const start = Date.now();
+        while (Date.now() - start < TIMEOUT_MS) {
+          await new Promise((r) => setTimeout(r, POLL_MS));
+          try {
+            const statusRes = await fetch(
+              `/api/deploy/status?deploymentId=${encodeURIComponent(json.deploymentId)}`
+            );
+            if (!statusRes.ok) continue;
+            const { state } = await statusRes.json();
+            if (state === "READY") break;
+            if (state === "ERROR" || state === "CANCELED") {
+              throw new Error("Vercel build failed");
+            }
+          } catch (pollErr) {
+            if (pollErr instanceof Error && pollErr.message === "Vercel build failed") {
+              throw pollErr;
+            }
+            // transient network error — keep polling
+          }
+        }
+      } else {
+        await new Promise((r) => setTimeout(r, 30000));
+      }
+
       setDeployState("done");
-      setDeployUrl(isEditMode ? json.deployedUrl : json.deployedUrl);
+      setDeployUrl(json.deployedUrl);
     } catch (err) {
       setDeployState("error");
       setDeployError(err instanceof Error ? err.message : "Unknown error");
@@ -95,16 +137,22 @@ export default function StepReview({ data, schoolId }: StepProps) {
   return (
     <div>
       {/* Header */}
-      <p className={kickerCls} style={kickerFont}>
-        step 07 / review &amp; deploy
-      </p>
-      <h1 className={headlineCls} style={headlineFont}>
-        <span style={italicAccent}>One more</span> look.
-      </h1>
-      <p className={subcopyCls} style={subcopyFont}>
-        If everything below looks right, hit {isEditMode ? "Redeploy" : "Deploy"}. We&rsquo;ll
-        create the repo, wire up Vercel, and email you a magic link in about a minute.
-      </p>
+      <motion.div
+        initial={reduce ? false : "hidden"}
+        animate="visible"
+        variants={headerContainer}
+      >
+        <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>
+          step 06 / review &amp; deploy
+        </motion.p>
+        <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+          <span style={italicAccent}>One more</span> look.
+        </motion.h1>
+        <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+          If everything below looks right, hit {isEditMode ? "Redeploy" : "Deploy"}. We&rsquo;ll
+          create the repo, wire up Vercel, and email you a magic link in about a minute.
+        </motion.p>
+      </motion.div>
 
       {/* ── School ─────────────────────────────────────────────────────────── */}
       <section className="mt-10">
@@ -341,7 +389,7 @@ export default function StepReview({ data, schoolId }: StepProps) {
       </div>
 
       {/* ── Deploy log ─────────────────────────────────────────────────────── */}
-      <DeployProgress
+      <DeployLog
         state={deployState}
         url={deployUrl}
         error={deployError}

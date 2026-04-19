@@ -1,4 +1,17 @@
+"use client";
+
+import React from "react";
 import type { WizardFormData } from "@/lib/types";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+
+const headerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const headerItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 type StepProps = { data: WizardFormData; onChange: (data: WizardFormData) => void };
 
@@ -11,72 +24,142 @@ type Feature = {
 const FEATURES: Feature[] = [
   {
     key: "events",
-    title: "Events & Calendar",
-    description: "Show school events, holidays, and breaks on a calendar page.",
+    title: "Events",
+    description:
+      "Show upcoming school events on the dashboard. Reads from the calendar you just set up.",
   },
   {
     key: "productivity",
-    title: "Productivity Tools",
-    description: "Pomodoro timer, Wordle, to-do list, and group randomizer.",
+    title: "Productivity",
+    description:
+      "Show a small focus timer and to-do list widget on the dashboard sidebar.",
   },
 ];
 
-function CheckIcon({ checked }: { checked: boolean }) {
-  if (!checked) {
-    return (
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-white/20 transition-colors duration-150" />
-    );
-  }
-  return (
-    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-white bg-white transition-colors duration-150">
-      <svg className="h-3 w-3 text-black" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
-  );
-}
+// Zine step-body primitives (shared visual language used by all 7 steps).
+const kickerCls =
+  "mb-3 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-ink-faded)]";
+const headlineCls =
+  "font-[900] leading-[0.95] tracking-[-0.02em] text-[color:var(--color-ink)]";
+const subcopyCls =
+  "mt-4 text-[15px] leading-[1.55] text-[color:var(--color-ink-soft)]";
+const labelCls =
+  "mb-1.5 block text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-ink-faded)]";
+void labelCls;
+const kickerFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const headlineFont: React.CSSProperties = {
+  fontFamily: "var(--font-archivo)",
+  fontSize: "clamp(32px, 4.2vw, 52px)",
+};
+const italicAccent: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontStyle: "italic",
+  fontWeight: 400,
+  letterSpacing: "-0.01em",
+};
+const subcopyFont: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  maxWidth: "52ch",
+};
+const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+void labelFont;
 
 export default function StepFeatures({ data, onChange }: StepProps) {
+  const reduce = useReducedMotion();
   function toggle(key: keyof WizardFormData["features"]) {
     onChange({ ...data, features: { ...data.features, [key]: !data.features[key] } });
   }
 
   return (
-    <div className="space-y-6">
+    <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
       <div>
-        <h2 className="text-xl font-semibold text-white">Features</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          Choose which optional features to include in your dashboard.
-        </p>
+        <motion.div
+          initial={reduce ? false : "hidden"}
+          animate="visible"
+          variants={headerContainer}
+        >
+          <motion.p variants={headerItem} className={kickerCls} style={kickerFont}>step 05 / features</motion.p>
+          <motion.h1 variants={headerItem} className={headlineCls} style={headlineFont}>
+            Pick the <span style={italicAccent}>extras.</span>
+          </motion.h1>
+          <motion.p variants={headerItem} className={subcopyCls} style={subcopyFont}>
+            Toggle optional dashboard sections on or off. Both can be changed later without
+            redeploying — flip them on to see how they look, off if they feel like clutter.
+          </motion.p>
+        </motion.div>
+
+        <div className="mt-10 space-y-5">
+          {FEATURES.map(({ key, title, description }) => {
+            const checked = data.features[key];
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggle(key)}
+                aria-pressed={checked}
+                className="flex w-full items-center gap-5 border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] p-5 text-left transition-colors hover:bg-[color:var(--color-ink)]/5"
+              >
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-[color:var(--color-ink)]"
+                  style={{ background: checked ? "var(--highlight)" : "transparent" }}
+                >
+                  {checked && (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path
+                        d="M3 8.5L6.5 12L13 4"
+                        stroke="var(--ink)"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </span>
+                <div>
+                  <p
+                    className="text-[18px] font-semibold text-[color:var(--color-ink)]"
+                    style={{ fontFamily: "var(--font-archivo)" }}
+                  >
+                    {title}
+                  </p>
+                  <p
+                    className="text-[14px] italic text-[color:var(--color-ink-soft)]"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {description}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {FEATURES.map(({ key, title, description }) => {
-          const checked = data.features[key];
-          return (
-            <button
-              key={key}
-              onClick={() => toggle(key)}
-              aria-pressed={checked}
-              className={`cursor-pointer w-full flex items-center gap-4 rounded-xl border-2 px-5 py-4 text-left transition-all duration-150 ${
-                checked
-                  ? "border-white bg-white/10"
-                  : "border-white/10 hover:border-white/20"
-              }`}
-            >
-              <CheckIcon checked={checked} />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white">{title}</p>
-                <p className="mt-0.5 text-sm text-gray-400">{description}</p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      <p className="text-xs text-gray-500">
-        The countdown timer and bell schedule are always included.
-      </p>
+      {/* Right-rail margin note */}
+      <aside className="order-first lg:order-last lg:pt-24" aria-label="Tip">
+        <div className="relative border-l-[3px] border-[color:var(--color-ink)] pl-5">
+          <span
+            aria-hidden="true"
+            className="absolute -left-8 -top-1 leading-none"
+            style={{
+              fontFamily: "var(--font-caveat)",
+              fontWeight: 700,
+              fontSize: 28,
+              color: "var(--marker)",
+              transform: "rotate(-6deg)",
+            }}
+          >
+            5
+          </span>
+          <p
+            className="text-[15px] italic leading-[1.5] text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Both features can be toggled later without redeploying. Flip them on to see how
+            they look; flip them off if they feel like clutter.
+          </p>
+        </div>
+      </aside>
     </div>
   );
 }
