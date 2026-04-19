@@ -36,4 +36,7 @@ model Announcement {
   updatedAt  DateTime @updatedAt
 
   @@index([schoolId, active])
+  // Separate collection from LakerWatch's standalone `Announcement` model —
+  // they share the same Mongo database but must NOT share records.
+  @@map("WizardAnnouncement")
 }
