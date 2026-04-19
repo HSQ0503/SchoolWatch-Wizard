@@ -92,6 +92,16 @@ export default function ZineHero() {
                 ↗
               </span>
             </a>
+            <Link
+              href="/custom-domain"
+              className="group inline-flex items-center gap-1.5 text-[13px] uppercase underline underline-offset-4 decoration-[1.5px] text-[color:var(--color-ink)] transition-colors duration-150 hover:text-[color:var(--color-marker)] hover:decoration-[color:var(--color-marker)] hover:[text-decoration-style:wavy]"
+              style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.14em" }}
+            >
+              Get a custom domain
+              <span className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-0.5">
+                →
+              </span>
+            </Link>
           </motion.div>
         </div>
 

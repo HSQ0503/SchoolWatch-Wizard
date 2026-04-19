@@ -50,12 +50,20 @@ export default function ManageShell({ schoolId, schoolName, initialData }: Props
             </p>
             <h1 className="mt-0.5 text-2xl font-semibold text-white">{schoolName}</h1>
           </div>
-          <button
-            onClick={handleLogout}
-            className="rounded-lg border border-white/20 px-3 py-2 text-sm text-gray-300 transition-colors hover:text-white"
-          >
-            Log out
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="/custom-domain"
+              className="rounded-lg border border-white/20 px-3 py-2 text-sm text-gray-300 transition-colors hover:text-white"
+            >
+              Get custom domain
+            </a>
+            <button
+              onClick={handleLogout}
+              className="rounded-lg border border-white/20 px-3 py-2 text-sm text-gray-300 transition-colors hover:text-white"
+            >
+              Log out
+            </button>
+          </div>
         </div>
 
         <div className="mb-6 flex gap-1 rounded-lg border border-white/10 bg-white/5 p-1">

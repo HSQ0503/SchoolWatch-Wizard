@@ -191,6 +191,21 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
           </div>
         )}
       </div>
+      {state === "done" && (
+        <p
+          className="mt-4 text-[13px] italic text-[color:var(--color-ink-soft)]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Want your own domain instead of the .vercel.app URL?{" "}
+          <a
+            href="/custom-domain"
+            className="text-[color:var(--color-ink)] underline underline-offset-4 decoration-[1.5px] transition-colors hover:text-[color:var(--color-marker)] hover:decoration-[color:var(--color-marker)] hover:[text-decoration-style:wavy]"
+          >
+            Request a custom domain
+          </a>
+          .
+        </p>
+      )}
     </div>
   );
 }
