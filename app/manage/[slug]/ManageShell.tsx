@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import WizardShell from "@/components/WizardShell";
@@ -45,10 +46,13 @@ export default function ManageShell({ schoolId, schoolName, initialData }: Props
       <div className="mx-auto max-w-5xl px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-              Manage
-            </p>
-            <h1 className="mt-0.5 text-2xl font-semibold text-white">{schoolName}</h1>
+            <Link
+              href="/"
+              className="text-xs font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-white"
+            >
+              ← SchoolWatch home
+            </Link>
+            <h1 className="mt-1 text-2xl font-semibold text-white">{schoolName}</h1>
           </div>
           <div className="flex items-center gap-2">
             <a

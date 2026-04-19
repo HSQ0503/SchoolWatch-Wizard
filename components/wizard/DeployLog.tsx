@@ -24,7 +24,12 @@ type Props = {
   isEditMode?: boolean;
 };
 
-type LogEntry = { t: string; kind: "ok" | "info" | "pending" | "err"; text: string };
+type LogEntry = {
+  t: string;
+  kind: "ok" | "info" | "pending" | "err" | "link";
+  text: string;
+  url?: string;
+};
 
 // Stage → log lines to append when that stage becomes current.
 // Timestamps increment monotonically across stages so the log looks like a real run.
@@ -94,7 +99,7 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setEntries((prev) => [
         ...prev,
-        { t: "      ", kind: "info", text: `→ ${url}` },
+        { t: "      ", kind: "link", text: url, url },
       ]);
     }
   }, [state, url]);
@@ -163,6 +168,19 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
             {e.kind === "info" && (
               <span className="text-[color:var(--color-ink-soft)]">{e.text}</span>
             )}
+            {e.kind === "link" && e.url && (
+              <span className="text-[color:var(--color-ink)]">
+                <span className="mr-1.5 text-[color:var(--color-ink-faded)]">→</span>
+                <a
+                  href={e.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-4 decoration-[1.5px] text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-marker)] hover:decoration-[color:var(--color-marker)] hover:[text-decoration-style:wavy]"
+                >
+                  {e.text}
+                </a>
+              </span>
+            )}
             {e.kind === "pending" && (
               <span
                 className="italic text-[color:var(--color-ink-soft)] motion-safe:animate-pulse"
@@ -191,20 +209,34 @@ export default function DeployLog({ state, url, error, isEditMode }: Props) {
           </div>
         )}
       </div>
-      {state === "done" && (
-        <p
-          className="mt-4 text-[13px] italic text-[color:var(--color-ink-soft)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Want your own domain instead of the .vercel.app URL?{" "}
+      {state === "done" && url && (
+        <div className="mt-6 flex flex-wrap items-center gap-4">
           <a
-            href="/custom-domain"
-            className="text-[color:var(--color-ink)] underline underline-offset-4 decoration-[1.5px] transition-colors hover:text-[color:var(--color-marker)] hover:decoration-[color:var(--color-marker)] hover:[text-decoration-style:wavy]"
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-2.5 border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-5 py-3 text-[color:var(--color-paper)] shadow-[6px_6px_0_var(--highlight)] transition-[transform,box-shadow] duration-150 hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[3px_3px_0_var(--highlight)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-[0_0_0_var(--highlight)]"
+            style={{ fontFamily: "var(--font-archivo)", fontSize: 14, letterSpacing: "0.02em" }}
           >
-            Request a custom domain
+            Visit your dashboard
+            <span className="text-[18px] leading-[0] transition-transform group-hover:translate-x-0.5">
+              ↗
+            </span>
           </a>
-          .
-        </p>
+          <p
+            className="text-[13px] italic text-[color:var(--color-ink-soft)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Want your own domain instead of the .vercel.app URL?{" "}
+            <a
+              href="/custom-domain"
+              className="text-[color:var(--color-ink)] underline underline-offset-4 decoration-[1.5px] transition-colors hover:text-[color:var(--color-marker)] hover:decoration-[color:var(--color-marker)] hover:[text-decoration-style:wavy]"
+            >
+              Request a custom domain
+            </a>
+            .
+          </p>
+        </div>
       )}
     </div>
   );
