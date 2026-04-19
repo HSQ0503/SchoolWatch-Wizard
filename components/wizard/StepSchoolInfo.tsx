@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { WizardFormData } from "@/lib/types";
 import { motion, useReducedMotion, type Variants } from "motion/react";
@@ -46,11 +46,14 @@ const subcopyFont: React.CSSProperties = {
 const inputFont: React.CSSProperties = { fontFamily: "var(--font-display)" };
 const labelFont: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
+const ACCEPTED_LOGO_TYPES = ["image/png", "image/jpeg", "image/svg+xml", "image/webp"];
+
 export default function StepSchoolInfo({ data, onChange }: StepProps) {
   const reduce = useReducedMotion();
   const school = data.school;
   const nameRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => { nameRef.current?.focus(); }, []);
 
@@ -58,9 +61,11 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
     onChange({ ...data, school: { ...school, ...patch } });
   }
 
-  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processLogoFile = useCallback((file: File) => {
+    if (!ACCEPTED_LOGO_TYPES.includes(file.type)) {
+      alert("Logo must be a PNG, JPG, SVG, or WebP");
+      return;
+    }
     if (file.size > 2 * 1024 * 1024) {
       alert("Logo must be under 2MB");
       return;
@@ -71,6 +76,32 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
     };
     reader.readAsDataURL(file);
   }, [data, onChange]);
+
+  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processLogoFile(file);
+  }, [processLogoFile]);
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only clear when leaving the drop zone itself, not child elements
+    if (e.currentTarget === e.target) setIsDragging(false);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processLogoFile(file);
+  }
 
   function removeLogo() {
     onChange({ ...data, logo: undefined });
@@ -242,7 +273,15 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
             <label className={labelCls} style={labelFont}>School logo (optional, max 2MB)</label>
             <div className="flex items-start gap-6">
               <label
-                className="flex h-[120px] w-[180px] cursor-pointer flex-col items-center justify-center border-2 border-dashed border-[color:var(--color-ink)] text-center transition-colors hover:bg-[color:var(--color-ink)]/5"
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`flex h-[120px] w-[180px] cursor-pointer flex-col items-center justify-center border-2 border-dashed text-center transition-colors ${
+                  isDragging
+                    ? "border-[color:var(--color-marker)] bg-[color:var(--color-marker)]/10"
+                    : "border-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)]/5"
+                }`}
               >
                 <input
                   ref={fileRef}
@@ -252,10 +291,10 @@ export default function StepSchoolInfo({ data, onChange }: StepProps) {
                   className="hidden"
                 />
                 <span
-                  className="text-[color:var(--color-ink)]"
+                  className={isDragging ? "text-[color:var(--color-marker)]" : "text-[color:var(--color-ink)]"}
                   style={{ fontFamily: "var(--font-caveat)", fontSize: 22, transform: "rotate(-2deg)" }}
                 >
-                  drop logo here ↙
+                  {isDragging ? "drop it!" : "drop logo here ↙"}
                 </span>
               </label>
               {data.logo && (
