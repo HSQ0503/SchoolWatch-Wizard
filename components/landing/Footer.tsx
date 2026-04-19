@@ -37,6 +37,12 @@ export default function Footer() {
           </p>
           <div className="flex gap-6">
             <a
+              href="/custom-domain"
+              className="text-[color:var(--color-ink)] underline decoration-[color:var(--color-marker)] underline-offset-2"
+            >
+              Custom domain
+            </a>
+            <a
               href="https://github.com/HSQ0503/schoolwatch-wizard"
               target="_blank"
               rel="noopener noreferrer"

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySessionToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const sessionCookie = req.cookies.get("session")?.value;
@@ -12,7 +13,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid session" }, { status: 401 });
   }
 
-  return NextResponse.json({ email: session.email });
+  // Also look up the school so the homepage can link straight to /manage/<slug>
+  const school = await prisma.school.findFirst({
+    where: { contactEmail: session.email },
+    select: { slug: true },
+  });
+
+  return NextResponse.json({ email: session.email, slug: school?.slug ?? null });
 }
 
 export async function DELETE() {

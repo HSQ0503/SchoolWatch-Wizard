@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthButton from "@/components/landing/AuthButton";
 
 // Sticky top nav for the zine homepage. Wavy red hover underlines.
 // Source: homepage-zine.html — nav.top
@@ -20,6 +21,7 @@ export default function ZineNav() {
         <a href="#how" className="hidden md:inline text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">How it works</a>
         <a href="#showcase" className="hidden md:inline text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">Live example</a>
         <a href="#faq" className="hidden md:inline text-[color:var(--color-ink)] no-underline hover:[text-decoration:underline_wavy_var(--marker)] hover:underline-offset-[4px]">FAQ</a>
+        <AuthButton />
         <Link
           href="/setup"
           className="group inline-flex items-center gap-2 border-2 border-[color:var(--ink)] bg-[color:var(--ink)] px-4 py-2 text-[color:var(--paper)] shadow-[4px_4px_0_var(--highlight)] transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_var(--highlight)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0_0_0_var(--highlight)] active:duration-75"
