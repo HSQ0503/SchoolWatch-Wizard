@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import WizardShell from "@/components/WizardShell";
 import StepSchoolInfo from "@/components/wizard/StepSchoolInfo";
 import StepColors from "@/components/wizard/StepColors";
@@ -55,6 +55,7 @@ const STEPS = [
 function EditPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const router = useRouter();
 
   const [status, setStatus] = useState<Status>("verifying");
   const [school, setSchool] = useState<{ id: string; configData: WizardFormData } | null>(null);
@@ -107,7 +108,13 @@ function EditPageContent() {
         }
 
         const schoolData = await schoolRes.json();
-        // Migrate old color format (flat { primary, accent }) to new zone format
+        const slug = schoolData.slug ?? schoolData.configData?.slug;
+        if (slug) {
+          router.replace(`/manage/${slug}?tab=setup`);
+          return;
+        }
+        // Fallback: if the API hasn't been updated to return slug yet,
+        // keep the legacy inline wizard so the page still works.
         const cfg = schoolData.configData;
         if (cfg?.colors && !cfg.colors.light) {
           const primary = cfg.colors.primary || "#003da5";
@@ -123,7 +130,7 @@ function EditPageContent() {
     }
 
     load();
-  }, [token]);
+  }, [token, router]);
 
   if (status === "verifying" || status === "loading") return <Spinner />;
   if (status === "error") return <ErrorMessage message={error} />;

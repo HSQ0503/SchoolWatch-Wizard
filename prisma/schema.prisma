@@ -8,15 +8,32 @@ datasource db {
 }
 
 model School {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
   name            String
-  slug            String   @unique
+  slug            String         @unique
   contactEmail    String
   configData      Json
   githubRepoName  String
   vercelProjectId String
   deployedUrl     String
   logoUrl         String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  announcements   Announcement[]
+}
+
+model Announcement {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  schoolId   String   @db.ObjectId
+  school     School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  title      String
+  body       String
+  type       String // "info" | "warning" | "urgent"
+  pinned     Boolean  @default(false)
+  active     Boolean  @default(true)
+  expiresAt  String? // "YYYY-MM-DD" or null
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([schoolId, active])
 }

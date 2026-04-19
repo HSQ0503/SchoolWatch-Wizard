@@ -100,7 +100,11 @@ function serializeEvents(
     .join(",\n");
 }
 
-export function generateConfigTs(data: WizardFormData, logoPath = "/logo.png"): string {
+export function generateConfigTs(
+  data: WizardFormData,
+  logoPath = "/logo.png",
+  slug = ""
+): string {
   const { school, lunchWaves, calendar, features } = data;
   const lightColors = data.colors.light;
   const darkColors = resolveDarkColors(lightColors, data.colors.dark);
@@ -187,6 +191,11 @@ ${eventsStr}
   features: {
     events: ${features.events},
     productivity: ${features.productivity},
+  },
+  announcements: {
+    enabled: ${slug ? "true" : "false"},
+    apiUrl: "${esc((process.env.NEXT_PUBLIC_APP_URL || "").replace(/\/$/, ""))}",
+    slug: "${esc(slug)}",
   },
 };
 export default config;
